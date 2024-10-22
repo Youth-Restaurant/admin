@@ -1,16 +1,37 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { auth, signIn } from '@/auth';
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
+  if (!session?.user) return <KakaoLoginPage />;
+
+  return <></>;
+}
+
+function KakaoLoginPage() {
   return (
-    <div className='flex flex-col justify-center items-center p-3 min-w-[340px] max-w-[500px] m-auto bg-white h-full'>
+    <div className='flex flex-col justify-center items-center p-3'>
       <Title />
       <div className='flex justify-center w-full'>
         <Image src='/logo.png' width={300} height={300} alt='이미지 로고' />
       </div>
-      <Button className='w-full bg-yellow-500 hover:bg-yellow-600 text-xl p-6'>
-        카카오 로그인
-      </Button>
+
+      <form
+        action={async () => {
+          'use server';
+          // POST 303(See Other) - redirect to a different URL using GET method
+          // GET 302
+          const res = await signIn('kakao');
+          console.log('res', res);
+        }}
+        className='w-full'
+      >
+        <Button className='w-full bg-yellow-500 hover:bg-yellow-600 text-xl p-6'>
+          카카오 로그인
+        </Button>
+      </form>
     </div>
   );
 }
