@@ -5,7 +5,7 @@ import { auth, signIn } from '@/auth';
 export default async function Home() {
   const session = await auth();
 
-  if (!session?.user) return <KakaoLoginPage />;
+  if (!session?.user?.name) return <KakaoLoginPage />;
 
   return <></>;
 }
