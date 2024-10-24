@@ -27,6 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const nickname = session?.user.nickname;
 
   return (
     <html lang='en'>
@@ -34,9 +35,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100`}
       >
         <div className='min-w-[340px] max-w-[500px] m-auto bg-white h-full relative'>
-          {session && <Header />}
+          {nickname && <Header />}
           {children}
-          {session && <Navigation profileImage={session.user.image} />}
+          {nickname && <Navigation profileImage={session.user.image} />}
         </div>
       </body>
     </html>

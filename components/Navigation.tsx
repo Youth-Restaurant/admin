@@ -1,6 +1,7 @@
 'use client';
 import { BellIcon, BoxIcon, Calendar, PaperclipIcon } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 type Props = {
@@ -11,10 +12,10 @@ export default function Navigation({ profileImage }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0); // 선택된 아이템의 인덱스를 추적
 
   const navItems = [
-    { icon: BellIcon, label: '공지사항' },
-    { icon: BoxIcon, label: '재고관리' },
-    { icon: Calendar, label: '일정' },
-    { icon: PaperclipIcon, label: '전자결재' },
+    { icon: BellIcon, label: '공지사항', href: '/notices' },
+    { icon: BoxIcon, label: '재고관리', href: '/inventory' },
+    { icon: Calendar, label: '일정', href: '/schedule' },
+    { icon: PaperclipIcon, label: '전자결재', href: '/approvals' },
   ];
 
   return (
@@ -22,30 +23,39 @@ export default function Navigation({ profileImage }: Props) {
       <ul className='flex w-full justify-around py-3'>
         {navItems.map((item, index) => {
           const IconComponent = item.icon;
+
           return (
-            <li
-              key={index}
-              className='flex flex-col items-center cursor-pointer'
-              onClick={() => setSelectedIndex(index)} // 아이템 클릭 시 선택 상태 업데이트
-            >
-              <IconComponent
-                strokeWidth={selectedIndex === index ? 1.5 : 1} // 선택되면 굵게, 아니면 얇게
-              />
-              <span className={selectedIndex === index ? 'font-semibold' : ''}>
-                {item.label}
-              </span>
+            <li key={index} className='flex flex-col items-center'>
+              <Link href={item.href}>
+                <div
+                  className='flex flex-col items-center cursor-pointer'
+                  onClick={() => setSelectedIndex(index)}
+                >
+                  <IconComponent
+                    strokeWidth={selectedIndex === index ? 2 : 1}
+                  />
+                  <span
+                    className={selectedIndex === index ? 'font-semibold' : ''}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+              </Link>
             </li>
           );
         })}
+
         <li>
-          <div className='rounded-full w-11 aspect-square overflow-hidden'>
-            <Image
-              alt='프로필 이미지'
-              src={profileImage || ''}
-              width={100}
-              height={100}
-            />
-          </div>
+          <Link href='/profile'>
+            <div className='rounded-full w-11 aspect-square overflow-hidden cursor-pointer'>
+              <Image
+                alt='프로필 이미지'
+                src={profileImage || ''}
+                width={100}
+                height={100}
+              />
+            </div>
+          </Link>
         </li>
       </ul>
     </nav>
