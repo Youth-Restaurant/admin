@@ -2,8 +2,6 @@ import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 
 export default auth((req) => {
-  // console.log('req.auth:', req.auth);
-
   if (!req.auth?.user.nickname && req.nextUrl.pathname !== '/login') {
     const newUrl = new URL('/login', req.nextUrl.origin);
     return Response.redirect(newUrl);

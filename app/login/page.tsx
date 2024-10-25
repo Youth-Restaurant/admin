@@ -1,4 +1,4 @@
-import { signIn } from '@/auth';
+import { signIn, signOut } from '@/auth';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
@@ -16,6 +16,7 @@ export default function Page() {
           await signIn('kakao', {
             redirectTo: '/',
           });
+          //   await signOut();
         }}
         className='w-full'
       >
