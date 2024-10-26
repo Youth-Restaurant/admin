@@ -14,6 +14,7 @@ export default async function ProfileImage() {
             src={session?.user.image || ''}
             width={100}
             height={100}
+            draggable={false}
           />
         </div>
       </Link>
