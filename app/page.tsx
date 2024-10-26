@@ -1,17 +1,36 @@
+// app/page.tsx
+import { Suspense } from 'react';
+import { prisma } from '@/lib/prisma';
 import PostPreview from '@/components/Post/PostPreview';
-import { mockPosts } from '@/mocks/posts';
+import CreatePostButton from '@/components/Post/CreatePostButton';
+import Loading from './loading';
 
-// 공지사항 페이지
-export default function Home() {
+async function getPosts() {
+  const posts = await prisma.post.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return posts;
+}
+
+export default async function Home() {
+  const posts = await getPosts();
+
   return (
-    // <DraggableScroll>
-    <ul className='flex flex-col gap-3 py-[10px]'>
-      {mockPosts.map((post) => (
-        <li key={post.id}>
-          <PostPreview post={post} />
-        </li>
-      ))}
-    </ul>
-    // </DraggableScroll>
+    <div className='container mx-auto px-4'>
+      <div className='sticky top-0 bg-white py-4 z-10'>
+        <CreatePostButton />
+      </div>
+      <Suspense fallback={<Loading />}>
+        <ul className='flex flex-col gap-3 py-[10px]'>
+          {posts.map((post) => (
+            <li key={post.id}>
+              <PostPreview post={post} />
+            </li>
+          ))}
+        </ul>
+      </Suspense>
+    </div>
   );
 }

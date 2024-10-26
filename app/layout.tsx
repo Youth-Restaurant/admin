@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '@/components/Header';
 import { auth } from '@/auth';
 import BottomNavigation from '@/components/BottomNavigation';
+import { SessionProvider } from 'next-auth/react';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -35,13 +36,13 @@ export default async function RootLayout({
       >
         <div className='min-w-[340px] max-w-[500px] m-auto bg-white h-full relative'>
           {session?.user.nickname ? (
-            <>
+            <SessionProvider>
               <Header />
               <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
                 {children}
               </main>
               <BottomNavigation />
-            </>
+            </SessionProvider>
           ) : (
             children
           )}

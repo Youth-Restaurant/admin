@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum InventoryType {
+  PRODUCT
+  FOOD
+}
+
+enum Role {
+  DIRECTOR    @map("이사")
+  CEO         @map("대표")
+  DEPARTMENT  @map("국장")
+  TEAM_LEADER @map("팀장")
+  TEACHER     @map("선생")
+  STUDENT     @map("학생")
+  UNKNOWN     @map("직급")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  nickname  String   @unique // 카카오 닉네임
+  email     String?
+  image     String   @default("/images/default-avatar.png") // 기본 이미지 설정
+  role      Role     @default(STUDENT)
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Inventory {
+  id               Int           @id @default(autoincrement())
+  type             InventoryType
+  name             String
+  location         String
+  registeredBy     String
+  registeredDate   DateTime
+  purchaseDate     DateTime?
+  image            String
+  quantity         Int?
+  lastViewedDate   DateTime
+  purchaseLocation String?
+
+  // Product specific fields
+  isConsumed   Boolean?
+  isBroken     Boolean?
+  disposalDate DateTime?
+
+  // Food specific fields
+  expirationDate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      Role
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  avatarUrl String
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@index([createdAt]) // createdAt 필드에 인덱스 추가 (정렬 성능 향상)
+}

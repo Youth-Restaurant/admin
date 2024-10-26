@@ -1,5 +1,8 @@
+import { $Enums } from '@prisma/client';
 import NextAuth, { DefaultSession } from 'next-auth';
 import Kakao from 'next-auth/providers/kakao';
+import prisma from './lib/prisma';
+import { roleMap } from './utils/role';
 
 type KakaoAccount = {
   profile_nickname_needs_agreement: boolean;
@@ -20,6 +23,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       nickname: string;
+      role: $Enums.Role;
       /**
        * By default, TypeScript merges new interface properties and overwrites existing ones.
        * In this case, the default session user properties will be overwritten,
@@ -41,31 +45,77 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
-      // 아예 맨 처음부터 회원가입 다시 하고 싶을때 주석 해제
-      // await fetch('https://kapi.kakao.com/v1/user/unlink', {
-      //   method: 'POST',
-      //   headers: {
-      //     Authorization: `Bearer ${account?.access_token}`,
-      //   },
-      // });
+    async signIn({ account, profile }: any) {
+      if (account?.provider === 'kakao') {
+        try {
+          await prisma.user.upsert({
+            where: {
+              nickname: profile.properties.nickname,
+            },
+            update: {
+              image:
+                profile.properties.profile_image ||
+                '/images/default-avatar.png',
+            },
+            create: {
+              nickname: profile.properties.nickname,
+              image:
+                profile.properties.profile_image ||
+                '/images/default-avatar.png',
+              email: profile.kakao_account?.email,
+              role: 'UNKNOWN',
+            },
+          });
+          return true;
+        } catch (error) {
+          console.error('Error in signIn callback:', error);
+          return false;
+        }
+      }
+      return false;
+    },
+    async jwt({ token, user }) {
+      try {
+        if (token.kakao_account && !token.role) {
+          // role이 없을 때만 API 호출
+          const nickname = (token.kakao_account as KakaoAccount).profile
+            .nickname;
+
+          const response = await fetch(
+            `${process.env.AUTH_URL}/api/user?nickname=${encodeURIComponent(
+              nickname
+            )}`
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+
+          const userData = await response.json();
+          token.role = userData.role; // token에 role 저장
+        }
+      } catch (error) {
+        console.error('Error in jwt callback:', error);
+        throw error;
+      }
 
       return { ...token, ...user };
     },
     async session({ session, token }) {
       if (token.kakao_account) {
         const account = token.kakao_account as KakaoAccount;
-        // 닉네임은 필수로 받았다고 가정
         session.user.nickname = account.profile.nickname;
-        // 프로필 이미지는 동의 여부 확인
+
         if (!account.profile_image_needs_agreement) {
-          // 동의했을 때만 이미지 URL 사용
           session.user.image = account.profile.profile_image_url;
         } else {
-          // 동의하지 않았을 때는 기본 이미지나 null 사용
-          session.user.image = '/default_profile_image.png'; // 또는 기본 이미지 URL
+          session.user.image = '/default_profile_image.png';
         }
+
+        // token에 저장된 role 사용
+        session.user.role = token.role as $Enums.Role;
       }
+
       return session;
     },
   },
