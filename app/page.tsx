@@ -1,4 +1,3 @@
-'use client';
 import PostPreview from '@/components/Post/PostPreview';
 import { mockPosts } from '@/mocks/posts';
 
