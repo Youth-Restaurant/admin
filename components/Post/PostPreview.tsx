@@ -22,8 +22,13 @@ const getRoleBadgeVariant = (role: Role): BadgeVariant => {
   return variants[role];
 };
 
+const getFirstCharacter = (name: string): string => {
+  return name.charAt(0);
+};
+
 const PostPreview = ({ post }: Props) => {
   const { id, name, role, content, createdAt, avatarUrl } = post;
+  const roleColors = getRoleBadgeVariant(role);
 
   return (
     <Link href={`/notice/${id}`} prefetch={false}>
@@ -33,7 +38,11 @@ const PostPreview = ({ post }: Props) => {
             {/* Profile Image */}
             <Avatar className='w-12 h-12'>
               <AvatarImage src={avatarUrl} alt={name} />
-              <AvatarFallback>AN</AvatarFallback>
+              <AvatarFallback
+                className={`bg-${roleColors}-500 text-white font-bold bg-opacity-70`}
+              >
+                {getFirstCharacter(name)}
+              </AvatarFallback>
             </Avatar>
 
             {/* Content */}
@@ -41,10 +50,7 @@ const PostPreview = ({ post }: Props) => {
               {/* Username */}
               <h2 className='text-lg font-semibold mb-2 flex gap-2 items-center'>
                 {name}{' '}
-                <Badge
-                  variant={getRoleBadgeVariant(role)}
-                  className='font-bold text-white'
-                >
+                <Badge variant={roleColors} className={`font-bold text-white`}>
                   {role}
                 </Badge>
               </h2>
