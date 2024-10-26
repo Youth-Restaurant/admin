@@ -36,9 +36,17 @@ export default async function RootLayout({
       >
         <SessionProvider>
           <div className='min-w-[340px] max-w-[500px] m-auto bg-white h-full relative'>
-            {session?.user.nickname && <Header />}
-            {children}
-            {session?.user.nickname && <BottomNavigation />}
+            {session?.user.nickname ? (
+              <>
+                <Header />
+                <main className='p-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
+                  {children}
+                </main>
+                <BottomNavigation />
+              </>
+            ) : (
+              children
+            )}
           </div>
         </SessionProvider>
       </body>
