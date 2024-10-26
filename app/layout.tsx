@@ -37,7 +37,7 @@ export default async function RootLayout({
           {session?.user.nickname ? (
             <>
               <Header />
-              <main className='p-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
+              <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
                 {children}
               </main>
               <BottomNavigation />
