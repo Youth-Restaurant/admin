@@ -1,5 +1,5 @@
 'use client';
-import { BellIcon, BoxIcon, Calendar, PaperclipIcon } from 'lucide-react';
+import { BellIcon, BoxIcon, Calendar, File } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ export default function Navigation() {
     { icon: BellIcon, label: '공지사항', href: '/' },
     { icon: BoxIcon, label: '재고관리', href: '/inventory' },
     { icon: Calendar, label: '일정', href: '/schedule' },
-    { icon: PaperclipIcon, label: '전자결재', href: '/approvals' },
+    { icon: File, label: '전자결재', href: '/approvals' },
   ];
 
   return (
