@@ -3,7 +3,6 @@ import localFont from 'next/font/local';
 import './globals.css';
 import Header from '@/components/Header';
 import { auth } from '@/auth';
-import { SessionProvider } from 'next-auth/react';
 import BottomNavigation from '@/components/BottomNavigation';
 
 const geistSans = localFont({
@@ -34,21 +33,19 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100`}
       >
-        <SessionProvider>
-          <div className='min-w-[340px] max-w-[500px] m-auto bg-white h-full relative'>
-            {session?.user.nickname ? (
-              <>
-                <Header />
-                <main className='p-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
-                  {children}
-                </main>
-                <BottomNavigation />
-              </>
-            ) : (
-              children
-            )}
-          </div>
-        </SessionProvider>
+        <div className='min-w-[340px] max-w-[500px] m-auto bg-white h-full relative'>
+          {session?.user.nickname ? (
+            <>
+              <Header />
+              <main className='p-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
+                {children}
+              </main>
+              <BottomNavigation />
+            </>
+          ) : (
+            children
+          )}
+        </div>
       </body>
     </html>
   );
