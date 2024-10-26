@@ -38,7 +38,7 @@ export default async function RootLayout({
           {session?.user.nickname ? (
             <SessionProvider>
               <Header />
-              <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto'>
+              <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto hide-scrollbar'>
                 {children}
               </main>
               <BottomNavigation />

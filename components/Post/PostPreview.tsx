@@ -6,6 +6,8 @@ import { formatDate } from '@/utils/date';
 import { Badge, BadgeVariant } from '../ui/badge';
 import Link from 'next/link';
 import { $Enums } from '@prisma/client';
+import Image from 'next/image';
+import AvatarIcon from '../AvatarIcon';
 
 type Props = {
   post: Post;
@@ -51,14 +53,7 @@ const PostPreview = ({ post }: Props) => {
         <CardContent className='pt-6'>
           <div className='flex items-start gap-4'>
             {/* Profile Image */}
-            <Avatar className='w-12 h-12'>
-              <AvatarImage src={avatarUrl} alt={name} />
-              <AvatarFallback
-                className={`bg-${roleColors}-500 text-white font-bold bg-opacity-70`}
-              >
-                {getFirstCharacter(name)}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarIcon avatarUrl={avatarUrl} name={name} role={role} />
 
             {/* Content */}
             <div className='flex-1'>

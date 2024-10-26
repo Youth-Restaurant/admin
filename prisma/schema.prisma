@@ -32,7 +32,8 @@ model User {
   id        String   @id @default(cuid())
   nickname  String   @unique // 카카오 닉네임
   email     String?
-  image     String   @default("/images/default-avatar.png") // 기본 이미지 설정
+  image     String?
+  // image     String   @default("/images/default-avatar.png") // 기본 이미지 설정
   role      Role     @default(STUDENT)
   posts     Post[]
   createdAt DateTime @default(now())

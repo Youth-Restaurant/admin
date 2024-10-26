@@ -53,15 +53,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               nickname: profile.properties.nickname,
             },
             update: {
-              image:
-                profile.properties.profile_image ||
-                '/images/default-avatar.png',
+              image: profile.properties.profile_image || null,
             },
             create: {
               nickname: profile.properties.nickname,
-              image:
-                profile.properties.profile_image ||
-                '/images/default-avatar.png',
+              image: profile.properties.profile_image || null,
               email: profile.kakao_account?.email,
               role: 'UNKNOWN',
             },
@@ -109,7 +105,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!account.profile_image_needs_agreement) {
           session.user.image = account.profile.profile_image_url;
         } else {
-          session.user.image = '/default_profile_image.png';
+          session.user.image = null;
         }
 
         // token에 저장된 role 사용
