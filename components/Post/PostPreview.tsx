@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Post } from '@/types/post';
+import { formatDate } from '@/utils/date';
 
 type Props = {
   post: Post;
@@ -10,7 +11,7 @@ type Props = {
 
 const PostPreview = ({ post }: Props) => {
   const router = useRouter();
-  const { id, name, content, date, avatarUrl } = post;
+  const { id, name, content, createdAt, avatarUrl } = post;
 
   const handleClick = () => {
     router.push(`/notice/${post.id}`);
@@ -40,7 +41,7 @@ const PostPreview = ({ post }: Props) => {
             {/* Date */}
             <div className='flex items-center text-gray-500 text-sm'>
               <Calendar className='w-4 h-4 mr-1' />
-              <span>2024년 10월 15일</span>
+              <span>{formatDate(createdAt)}</span>
             </div>
           </div>
         </div>
