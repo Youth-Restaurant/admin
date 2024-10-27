@@ -65,7 +65,7 @@ function PushNotificationManager() {
 
       console.log('구독 성공:', sub);
       setSubscription(sub);
-      await subscribeUser(sub);
+      await subscribeUser(JSON.parse(JSON.stringify(subscription)));
     } catch (error) {
       console.error('구독 중 오류 발생:', error);
     }
