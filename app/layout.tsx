@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: '사회적 협동조합 청소년 자립학교 직원 전용 서비스',
   description: '사회적 협동조합 청소년 자립학교 직원 전용 서비스입니다.',
   manifest: '/manifest.json',
+  icons: '/images/web-app-manifest-192x192.png',
 };
 
 export default async function RootLayout({
