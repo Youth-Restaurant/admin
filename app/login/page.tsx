@@ -7,7 +7,12 @@ export default function Page() {
     <div className='flex flex-col justify-center items-center p-3 h-full'>
       <Title />
       <div className='flex justify-center w-full'>
-        <Image src='/logo.png' width={300} height={300} alt='이미지 로고' />
+        <Image
+          src='/images/logo.png'
+          width={300}
+          height={300}
+          alt='이미지 로고'
+        />
       </div>
 
       <form
