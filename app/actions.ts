@@ -1,11 +1,13 @@
 'use server';
 
-import webpush from 'web-push';
+import webpush, { PushSubscription } from 'web-push';
+
+const keys = webpush.generateVAPIDKeys();
 
 webpush.setVapidDetails(
-  '<mailto:your-email@example.com>',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  'mailto:artemismars2@gmail.com',
+  keys.publicKey,
+  keys.privateKey
 );
 
 let subscription: PushSubscription | null = null;
