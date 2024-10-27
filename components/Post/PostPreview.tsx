@@ -1,12 +1,10 @@
 import { Card, CardContent } from '../ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Calendar } from 'lucide-react';
 import { Post } from '@/types/post';
 import { formatDate } from '@/utils/date';
 import { Badge, BadgeVariant } from '../ui/badge';
 import Link from 'next/link';
 import { $Enums } from '@prisma/client';
-import Image from 'next/image';
 import AvatarIcon from '../AvatarIcon';
 
 type Props = {
@@ -39,10 +37,6 @@ const getRoleDisplayName = (role: $Enums.Role): string => {
   return displayNames[role];
 };
 
-const getFirstCharacter = (name: string): string => {
-  return name.charAt(0);
-};
-
 const PostPreview = ({ post }: Props) => {
   const { id, name, role, content, createdAt, avatarUrl } = post;
   const roleColors = getRoleBadgeVariant(role);
@@ -54,7 +48,6 @@ const PostPreview = ({ post }: Props) => {
           <div className='flex items-start gap-4'>
             {/* Profile Image */}
             <AvatarIcon avatarUrl={avatarUrl} name={name} role={role} />
-
             {/* Content */}
             <div className='flex-1'>
               {/* Username */}

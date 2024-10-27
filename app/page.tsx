@@ -2,8 +2,8 @@
 import { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
 import PostPreview from '@/components/Post/PostPreview';
-import CreatePostButton from '@/components/Post/CreatePostButton';
 import Loading from './loading';
+import CreatePost from '@/components/Post/CreatePost';
 
 async function getPosts() {
   const posts = await prisma.post.findMany({
@@ -20,7 +20,7 @@ export default async function Home() {
   return (
     <div className='container mx-auto px-4'>
       <div className='sticky top-0 bg-white py-4 z-10'>
-        <CreatePostButton />
+        <CreatePost />
       </div>
       <Suspense fallback={<Loading />}>
         <ul className='flex flex-col gap-3 py-[10px]'>

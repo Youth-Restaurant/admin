@@ -1,7 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -13,32 +12,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { getRoleBadgeVariant, getRoleDisplayName } from '@/utils/role';
+import { User } from '@prisma/client';
 
-export default function CreatePostButton() {
+interface CreatePostButtonProps {
+  user: Pick<User, 'nickname' | 'role' | 'image'>;
+}
+
+export default function CreatePostButton({ user }: CreatePostButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { data: session } = useSession();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // user가 없을 때의 처리
+  if (!user) {
+    return <div>user</div>; // 또는 로딩 상태를 보여줄 수 있습니다
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    if (!session?.user) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
     try {
       const response = await fetch('api/notice', {
         method: 'POST',
         body: JSON.stringify({
-          name: session.user.nickname,
-          role: session.user.role,
+          name: user.nickname,
+          role: user.role,
           content: formData.get('content'),
-          avatarUrl: session.user.image || '/default-avatar.png',
+          avatarUrl: user.image || '/default-avatar.png',
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -52,10 +51,6 @@ export default function CreatePostButton() {
       alert('게시글 작성에 실패했습니다.');
     }
   };
-
-  if (!mounted || !session) {
-    return <div className='w-full h-10 bg-gray-100 animate-pulse rounded' />;
-  }
 
   return (
     <>
@@ -73,13 +68,13 @@ export default function CreatePostButton() {
           <form onSubmit={handleSubmit} className='space-y-4'>
             <div className='flex items-center gap-3'>
               <Label>작성자</Label>
-              <p className='text-gray-700'>{session.user.nickname}</p>
+              <p className='text-gray-700'>{user.nickname}</p>
             </div>
             <div className='flex items-center gap-3'>
               <Label>직급</Label>
               <div>
-                <Badge variant={getRoleBadgeVariant(session.user.role)}>
-                  {getRoleDisplayName(session.user.role)}
+                <Badge variant={getRoleBadgeVariant(user.role)}>
+                  {getRoleDisplayName(user.role)}
                 </Badge>
               </div>
             </div>
