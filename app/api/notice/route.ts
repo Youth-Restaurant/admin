@@ -12,10 +12,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(post);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to create post' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }
 // GET 요청 처리 예시 (최신순 정렬)
@@ -28,9 +25,6 @@ export async function GET() {
     });
     return NextResponse.json(posts);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch posts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }
