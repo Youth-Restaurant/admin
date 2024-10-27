@@ -2,7 +2,6 @@ import { $Enums } from '@prisma/client';
 import NextAuth, { DefaultSession } from 'next-auth';
 import Kakao from 'next-auth/providers/kakao';
 import prisma from './lib/prisma';
-import { roleMap } from './utils/role';
 
 type KakaoAccount = {
   profile_nickname_needs_agreement: boolean;
@@ -24,6 +23,7 @@ declare module 'next-auth' {
     user: {
       nickname: string;
       role: $Enums.Role;
+      image: string | null;
       /**
        * By default, TypeScript merges new interface properties and overwrites existing ones.
        * In this case, the default session user properties will be overwritten,
@@ -31,6 +31,28 @@ declare module 'next-auth' {
        * you need to add them back into the newly declared interface.
        */
     } & DefaultSession['user'];
+  }
+
+  interface Profile {
+    connected_at: string;
+    properties: {
+      nickname: string;
+      profile_image?: string;
+      thumbnail_image?: string;
+    };
+    kakao_account: {
+      profile_nickname_needs_agreement?: boolean;
+      profile_image_needs_agreement?: boolean;
+      profile?: {
+        nickname: string;
+        thumbnail_image_url?: string;
+        profile_image_url?: string;
+        is_default_image?: boolean;
+        is_default_nickname?: boolean;
+      };
+      email?: string;
+      email_needs_agreement?: boolean;
+    };
   }
 }
 
@@ -45,8 +67,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ account, profile }: any) {
-      if (account?.provider === 'kakao') {
+    async signIn({ account, profile }) {
+      if (account?.provider === 'kakao' && profile) {
         try {
           await prisma.user.upsert({
             where: {

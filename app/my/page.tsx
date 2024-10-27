@@ -1,7 +1,118 @@
-import { auth } from '@/auth';
+'use client';
 
-export default async function Page() {
-  const session = await auth();
+import { useState, useEffect } from 'react';
+import {
+  subscribeUser,
+  unsubscribeUser,
+  sendNotification,
+} from '@/app/actions';
 
-  return <div>안녕하세요! {session?.user.nickname} 님!</div>;
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+') // 백슬래시 제거
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }
+
+function PushNotificationManager() {
+  const [isSupported, setIsSupported] = useState(false);
+  const [subscription, setSubscription] = useState<PushSubscription | null>(
+    null
+  );
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setIsSupported(true);
+      registerServiceWorker();
+    }
+  }, []);
+
+  async function registerServiceWorker() {
+    const registration = await navigator.serviceWorker.register('/sw.js', {
+      scope: '/',
+      updateViaCache: 'none',
+    });
+    const sub = await registration.pushManager.getSubscription();
+    setSubscription(sub);
+  }
+
+  async function subscribeToPush() {
+    try {
+      // 알림 권한 요청
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        throw new Error('알림 권한이 거부되었습니다.');
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      console.log('registration', registration);
+
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''
+        ),
+      });
+
+      console.log('구독 성공:', sub);
+      setSubscription(sub);
+      await subscribeUser(sub);
+    } catch (error) {
+      console.error('구독 중 오류 발생:', error);
+    }
+  }
+
+  async function unsubscribeFromPush() {
+    await subscription?.unsubscribe();
+    setSubscription(null);
+    await unsubscribeUser();
+  }
+
+  async function sendTestNotification() {
+    if (subscription) {
+      await sendNotification(message);
+      setMessage('');
+    }
+  }
+
+  if (!isSupported) {
+    return <p>Push notifications are not supported in this browser.</p>;
+  }
+
+  console.log('subscription', subscription);
+
+  return (
+    <div>
+      <h3>Push Notifications</h3>
+      {subscription ? (
+        <>
+          <p>You are subscribed to push notifications.</p>
+          <button onClick={unsubscribeFromPush}>Unsubscribe</button>
+          <input
+            type='text'
+            placeholder='Enter notification message'
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <button onClick={sendTestNotification}>Send Test</button>
+        </>
+      ) : (
+        <>
+          <p>You are not subscribed to push notifications.</p>
+          <button onClick={subscribeToPush}>Subscribe</button>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default PushNotificationManager;
