@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import Header from '@/components/Header';
@@ -23,6 +23,14 @@ export const metadata: Metadata = {
   icons: '/images/web-app-manifest-192x192.png',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  height: 'device-height',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -35,7 +43,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100`}
       >
-        <div className='min-w-[340px] max-w-[500px] m-auto bg-white h-full relative'>
+        <div className='min-w-[340px] max-w-[500px] m-auto bg-white min-h-screen relative'>
           {session?.user.nickname ? (
             <SessionProvider>
               <Header />
