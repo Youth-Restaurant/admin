@@ -1,4 +1,4 @@
-// utils/hangulSearch.ts
+// utils/search.ts
 
 // 초성 정의
 const CHOSUNG_LIST = [
@@ -80,6 +80,11 @@ const JONGSUNG_LIST = [
   'ㅎ',
 ];
 
+// 텍스트 정규화 함수: 띄어쓰기 제거 및 소문자 변환
+const normalizeText = (text: string): string => {
+  return text.replace(/\s+/g, '').toLowerCase();
+};
+
 // 단일 문자를 초성/중성/종성으로 분해
 export const decomposeHangul = (char: string): string[] => {
   const charCode = char.charCodeAt(0);
@@ -126,13 +131,14 @@ export const isChosung = (char: string): boolean => {
   return CHOSUNG_LIST.includes(char);
 };
 
-// 검색 함수
+// 향상된 검색 함수
 export const matchKoreanText = (text: string, search: string): boolean => {
   // 검색어가 비어있으면 true 반환
   if (!search) return true;
 
-  const normalizedText = text.toLowerCase();
-  const normalizedSearch = search.toLowerCase();
+  // 텍스트 정규화 (띄어쓰기 제거 및 소문자 변환)
+  const normalizedText = normalizeText(text);
+  const normalizedSearch = normalizeText(search);
 
   // 일반 텍스트 검색
   if (normalizedText.includes(normalizedSearch)) return true;
