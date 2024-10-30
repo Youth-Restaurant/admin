@@ -26,7 +26,7 @@ import { CategorySelect } from './CategorySelect';
 import { SupplyFields } from './SupplyFields';
 import { FoodFields } from './FoodFields';
 import ImageUploader from '@/components/ImageUploader';
-import InventoryTab from '@/components/inventory/\bInventoryTab';
+import InventoryTab from '@/components/inventory/InventoryTab';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
 
 type InventoryUploadModalProps = {

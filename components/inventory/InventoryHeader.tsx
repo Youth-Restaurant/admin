@@ -7,10 +7,10 @@ import {
   UploadFoodItem,
   UploadSupplyItem,
 } from '@/types/inventory';
-import InventorySearch from '@/components/inventory/inventorySearch';
 import InventoryUploadModal from '@/components/Modal/InventoryModal';
 import { useSession } from 'next-auth/react';
-import InventoryTab from './\bInventoryTab';
+import InventorySearch from './InventorySearch';
+import InventoryTab from './InventoryTab';
 
 type InventoryHeaderProps = {
   selectedTab: InventoryType;
