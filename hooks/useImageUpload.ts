@@ -107,13 +107,10 @@ const uploadImage = async (file: File): Promise<string> => {
   formData.append('file', file);
   formData.append('extension', getFileExtension(file));
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_FILE_STORAGE_URL}/upload`,
-    {
-      method: 'POST',
-      body: formData,
-    }
-  );
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
 
   if (!response.ok) {
     throw new Error('Upload failed');
