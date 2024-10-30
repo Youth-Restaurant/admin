@@ -1,10 +1,11 @@
+import { $Enums } from '@prisma/client';
 // app/api/inventory/route.ts
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type') || 'supplies';
+  const type = (searchParams.get('type') || 'SUPPLIES') as $Enums.InventoryType;
 
   try {
     const items = await prisma.inventory.findMany({

@@ -1,20 +1,26 @@
 // /components/inventory/InventoryHeader.tsx
 'use client';
-import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LOCATIONS } from '@/types/inventory';
+import {
+  InventoryType,
+  LOCATIONS,
+  UploadFoodItem,
+  UploadSupplyItem,
+} from '@/types/inventory';
 import InventorySearch from '@/components/inventory/inventorySearch';
+import InventoryUploadModal from '@/components/Modal/InventoryModal';
+import { useSession } from 'next-auth/react';
+import InventoryTab from './\bInventoryTab';
 
 type InventoryHeaderProps = {
-  selectedTab: 'supplies' | 'food';
+  selectedTab: InventoryType;
   selectedLocation: string;
   searchQuery: string;
-  onTabChange: (tab: 'supplies' | 'food') => void;
+  onTabChange: (tab: InventoryType) => void;
   onLocationChange: (location: string) => void;
   onSearchChange: (query: string) => void;
   isLoading?: boolean;
+  onUpload: (data: UploadSupplyItem | UploadFoodItem) => Promise<void>;
 };
 
 export default function InventoryHeader({
@@ -25,7 +31,13 @@ export default function InventoryHeader({
   onLocationChange,
   onSearchChange,
   isLoading = false,
+  onUpload,
 }: InventoryHeaderProps) {
+  const session = useSession();
+  const nickname = session.data?.user.nickname;
+
+  if (nickname === undefined) return null;
+
   return (
     <div className='sticky top-0 bg-white p-4 z-10 border-b'>
       <div className='flex gap-2 mb-4'>
@@ -34,26 +46,18 @@ export default function InventoryHeader({
           onChange={onSearchChange}
           disabled={isLoading}
         />
-        <Button className='bg-blue-500 hover:bg-blue-600' disabled={isLoading}>
-          <Upload className='w-4 h-4 mr-2' />
-          추가
-        </Button>
+        <InventoryUploadModal
+          isLoading={isLoading}
+          onSubmit={onUpload}
+          updatedBy={nickname}
+        />
       </div>
 
-      <Tabs
-        value={selectedTab}
-        className='mb-4'
-        onValueChange={(value) => onTabChange(value as 'supplies' | 'food')}
-      >
-        <TabsList className='grid w-full grid-cols-2'>
-          <TabsTrigger value='supplies' disabled={isLoading}>
-            물품
-          </TabsTrigger>
-          <TabsTrigger value='food' disabled={isLoading}>
-            식재료
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <InventoryTab
+        isLoading={isLoading}
+        selectedTab={selectedTab}
+        onTabChange={(value) => onTabChange(value as 'supplies' | 'food')}
+      />
 
       <div className='flex gap-2 overflow-x-auto hide-scrollbar'>
         <Badge

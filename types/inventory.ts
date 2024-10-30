@@ -1,86 +1,169 @@
-// /types/inventory.ts
+import { $Enums } from '@prisma/client';
 
-// 재고 상태 타입
-export type InventoryStatus = '충분' | '부족';
+/**
+ * /types/inventory.ts
+ * 재고 관리 시스템에서 사용되는 타입 정의
+ */
+/**
+ * 재고 타입 (물품/식재료)
+ */
+export type InventoryType = Lowercase<$Enums.InventoryType>;
 
-// 재고 카테고리 타입 (물품)
+/**
+ * Enum 한글 매핑
+ */
+export const INVENTORY_STATUS = {
+  SUFFICIENT: '충분',
+  LOW: '부족',
+} as const satisfies Record<$Enums.InventoryStatus, string>;
+
+export type InventoryStatus =
+  (typeof INVENTORY_STATUS)[keyof typeof INVENTORY_STATUS];
+
+export const SUPPLY_CATEGORY = {
+  CLEANING: '청소용품',
+  DISPOSABLE: '일회용품',
+  FURNITURE: '가구',
+  KITCHEN: '주방용품',
+  OFFICE: '사무용품',
+} as const satisfies Record<$Enums.SupplyCategory, string>;
+
 export type SupplyCategoryType =
-  | '청소용품'
-  | '일회용품'
-  | '가구'
-  | '주방용품'
-  | '사무용품';
+  (typeof SUPPLY_CATEGORY)[keyof typeof SUPPLY_CATEGORY];
 
-// 재고 카테고리 타입 (식재료)
+export const FOOD_CATEGORY = {
+  VEGETABLE: '채소',
+  MEAT: '육류',
+  SEAFOOD: '수산물',
+  SEASONING: '조미료',
+  GRAIN: '곡물',
+  DAIRY: '유제품',
+  BEVERAGE: '음료',
+} as const satisfies Record<$Enums.FoodCategory, string>;
+
 export type FoodCategoryType =
-  | '채소'
-  | '육류'
-  | '수산물'
-  | '조미료'
-  | '곡물'
-  | '유제품'
-  | '음료';
+  (typeof FOOD_CATEGORY)[keyof typeof FOOD_CATEGORY];
 
-// 위치 타입 (물품)
-export type SupplyLocationType = '주방' | '홀' | '창고';
+export const SUPPLY_LOCATION = {
+  KITCHEN: '주방',
+  HALL: '홀',
+  STORAGE: '창고',
+} as const satisfies Record<$Enums.SupplyLocation, string>;
 
-// 위치 타입 (식재료)
-export type FoodLocationType = '주방' | '창고' | '냉장고';
+export type SupplyLocationType =
+  (typeof SUPPLY_LOCATION)[keyof typeof SUPPLY_LOCATION];
 
-// 재고 아이템 기본 인터페이스
+export const FOOD_LOCATION = {
+  KITCHEN: '주방',
+  STORAGE: '창고',
+  REFRIGERATOR: '냉장고',
+} as const satisfies Record<$Enums.FoodLocation, string>;
+
+export type FoodLocationType =
+  (typeof FOOD_LOCATION)[keyof typeof FOOD_LOCATION];
+
+/**
+ * 재고 아이템 기본 인터페이스
+ */
 interface BaseInventoryItem {
   id: number;
   name: string;
-  quantity: string;
+  quantity: number;
   lastUpdated: string;
   updatedBy: string;
   status: InventoryStatus;
-  memo?: string; // 선택적 메모 필드
-  minimumQuantity?: string; // 최소 보유량
+  memo?: string;
+  minimumQuantity?: number;
+  imageUrl?: string;
 }
 
-// 물품 타입
+/**
+ * 물품 타입
+ */
 export interface SupplyItem extends BaseInventoryItem {
   type: 'supplies';
   category: SupplyCategoryType;
   location: SupplyLocationType;
-  manufacturer?: string; // 제조사
-  modelNumber?: string; // 모델번호
+  manufacturer?: string;
+  modelNumber?: string;
 }
 
-// 식재료 타입
+/**
+ * 식재료 타입
+ */
 export interface FoodItem extends BaseInventoryItem {
   type: 'food';
   category: FoodCategoryType;
   location: FoodLocationType;
-  expirationDate?: string; // 유통기한
-  storageTemp?: string; // 보관 온도
+  expirationDate?: string;
 }
 
-// 통합 타입
 export type InventoryItem = SupplyItem | FoodItem;
 
-// 카테고리 상수
-export const SUPPLY_CATEGORIES: SupplyCategoryType[] = [
-  '청소용품',
-  '일회용품',
-  '가구',
-  '주방용품',
-  '사무용품',
-];
+/**
+ * 카테고리 및 위치 상수
+ */
+export const SUPPLY_CATEGORIES = Object.values(SUPPLY_CATEGORY);
+export const FOOD_CATEGORIES = Object.values(FOOD_CATEGORY);
 
-export const FOOD_CATEGORIES: FoodCategoryType[] = [
-  '채소',
-  '육류',
-  '수산물',
-  '조미료',
-  '곡물',
-  '유제품',
-  '음료',
-];
-
-// 위치 정보 상수 (mocks/inventory.ts에서 사용하던 것을 여기로 이동)
 export const LOCATIONS = {
-  supplies: ['주방', '홀', '창고'] as const,
-  food: ['주방', '창고', '냉장고'] as const,
+  supplies: Object.values(SUPPLY_LOCATION),
+  food: Object.values(FOOD_LOCATION),
+} as const;
+
+/**
+ * Enum 매핑
+ */
+export const ENUM_MAPPINGS = {
+  type: {
+    supplies: '물품',
+    food: '식재료',
+  },
+  status: INVENTORY_STATUS,
+  supplyCategory: SUPPLY_CATEGORY,
+  foodCategory: FOOD_CATEGORY,
+  supplyLocation: SUPPLY_LOCATION,
+  foodLocation: FOOD_LOCATION,
+} as const;
+
+/**
+ * Upload 타입
+ */
+export type UploadSupplyItem = Omit<SupplyItem, 'id' | 'lastUpdated'>;
+export type UploadFoodItem = Omit<FoodItem, 'id' | 'lastUpdated'>;
+
+/**
+ * Enum 유틸리티 타입
+ */
+export type EnumType = keyof typeof ENUM_MAPPINGS;
+export type EnumValue<T extends EnumType> = keyof (typeof ENUM_MAPPINGS)[T];
+export type DisplayValue<T extends EnumType> =
+  (typeof ENUM_MAPPINGS)[T][EnumValue<T>];
+
+/**
+ * Enum 변환 유틸리티 함수들
+ */
+export const convertEnumToDisplay = <T extends EnumType>(
+  type: T,
+  enumValue: EnumValue<T>
+): DisplayValue<T> => {
+  const mapping = ENUM_MAPPINGS[type];
+  return mapping[enumValue] as DisplayValue<T>;
+};
+
+export const convertDisplayToEnum = <T extends EnumType>(
+  type: T,
+  displayValue: string
+): EnumValue<T> | undefined => {
+  const mapping = ENUM_MAPPINGS[type];
+  return Object.entries(mapping).find(
+    ([, value]) => value === displayValue
+  )?.[0] as EnumValue<T>;
+};
+
+export const isValidEnumValue = <T extends EnumType>(
+  type: T,
+  value: unknown
+): value is EnumValue<T> => {
+  return typeof value === 'string' && value in ENUM_MAPPINGS[type];
 };

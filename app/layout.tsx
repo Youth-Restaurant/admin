@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import { auth } from '@/auth';
 import BottomNavigation from '@/components/BottomNavigation';
 import { SessionProvider } from 'next-auth/react';
+import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -49,6 +50,7 @@ export default async function RootLayout({
               <Header />
               <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto hide-scrollbar'>
                 {children}
+                <Toaster />
               </main>
               <BottomNavigation />
             </SessionProvider>
