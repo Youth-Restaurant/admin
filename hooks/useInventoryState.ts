@@ -8,7 +8,7 @@ import {
 } from '@/types/inventory';
 
 export function useInventoryState() {
-  const [selectedTab, setSelectedTab] = useState<InventoryType>('supplies');
+  const [selectedTab, setSelectedTab] = useState<InventoryType>('supply');
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<InventoryItem[]>([]);

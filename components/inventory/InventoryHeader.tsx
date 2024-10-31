@@ -2,6 +2,7 @@
 'use client';
 import { Badge } from '@/components/ui/badge';
 import {
+  convertEnumToDisplay,
   InventoryType,
   LOCATIONS,
   UploadFoodItem,
@@ -11,6 +12,7 @@ import InventoryUploadModal from '@/components/Modal/InventoryModal';
 import { useSession } from 'next-auth/react';
 import InventorySearch from './InventorySearch';
 import InventoryTab from './InventoryTab';
+import { FoodLocation, SupplyLocation } from '@prisma/client';
 
 type InventoryHeaderProps = {
   selectedTab: InventoryType;
@@ -78,7 +80,13 @@ export default function InventoryHeader({
             }`}
             onClick={() => onLocationChange(location)}
           >
-            {location}
+            {selectedTab === 'supply' &&
+              convertEnumToDisplay(
+                'supplyLocation',
+                location as SupplyLocation
+              )}
+            {selectedTab === 'food' &&
+              convertEnumToDisplay('foodLocation', location as FoodLocation)}
           </Badge>
         ))}
       </div>

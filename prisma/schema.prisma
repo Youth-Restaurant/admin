@@ -8,8 +8,8 @@ datasource db {
 }
 
 enum InventoryType {
-  SUPPLIES @map("물품")
-  FOOD     @map("식재료")
+  SUPPLY @map("물품")
+  FOOD   @map("식재료")
 }
 
 enum InventoryStatus {
@@ -85,7 +85,7 @@ model Post {
 model Inventory {
   id              Int             @id @default(autoincrement())
   name            String
-  type            InventoryType   @default(SUPPLIES)
+  type            InventoryType   @default(SUPPLY)
   quantity        Int             @default(-1)
   status          InventoryStatus @default(SUFFICIENT)
   location        String

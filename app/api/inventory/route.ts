@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = (searchParams.get('type') || 'SUPPLIES') as $Enums.InventoryType;
+  const type = (searchParams.get('type') || 'SUPPLY') as $Enums.InventoryType;
 
   try {
     const items = await prisma.inventory.findMany({

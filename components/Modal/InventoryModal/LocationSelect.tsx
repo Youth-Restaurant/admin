@@ -7,11 +7,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { LOCATIONS } from '@/types/inventory';
+import { InventoryType, LOCATIONS } from '@/types/inventory';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
 
 type LocationSelectProps = {
-  selectedTab: 'supplies' | 'food';
+  selectedTab: InventoryType;
   value: string;
   onChange: (e: { name: string; value: string }) => void;
   required?: boolean;

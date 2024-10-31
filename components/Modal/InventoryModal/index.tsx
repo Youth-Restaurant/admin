@@ -44,7 +44,7 @@ type CommonFields = Pick<
 >;
 
 type FormState = {
-  supplies: UploadSupplyItem;
+  supply: UploadSupplyItem;
   food: UploadFoodItem;
 };
 
@@ -58,9 +58,9 @@ const getCommonFields = (updatedBy: string): CommonFields => ({
 });
 
 const getTypeSpecificFields = (type: InventoryType) => {
-  if (type === 'supplies') {
+  if (type === 'supply') {
     return {
-      type: 'supplies' as const,
+      type: 'supply' as const,
       location: '' as SupplyLocationType,
       category: '' as SupplyCategoryType,
       manufacturer: '',
@@ -104,9 +104,7 @@ export default function InventoryUploadModal({
 }: InventoryUploadModalProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<'supplies' | 'food'>(
-    'supplies'
-  );
+  const [selectedTab, setSelectedTab] = useState<InventoryType>('supply');
   const [commonFields, setCommonFields] = useState<CommonFields>(
     getCommonFields(updatedBy)
   );
@@ -139,9 +137,9 @@ export default function InventoryUploadModal({
   };
 
   const resetForm = useCallback(() => {
-    setSelectedTab('supplies');
+    setSelectedTab('supply');
     setCommonFields(getCommonFields(updatedBy));
-    setTypeSpecificFields(getTypeSpecificFields('supplies'));
+    setTypeSpecificFields(getTypeSpecificFields('supply'));
   }, [updatedBy]);
 
   const handleOpenChange = useCallback(
@@ -322,7 +320,7 @@ export default function InventoryUploadModal({
             </div>
           </div>
 
-          {typeSpecificFields.type === 'supplies' && (
+          {typeSpecificFields.type === 'supply' && (
             <SupplyFields fields={typeSpecificFields} onChange={handleChange} />
           )}
           {typeSpecificFields.type === 'food' && (

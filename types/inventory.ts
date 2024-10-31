@@ -81,7 +81,7 @@ interface BaseInventoryItem {
  * 물품 타입
  */
 export interface SupplyItem extends BaseInventoryItem {
-  type: 'supplies';
+  type: 'supply';
   category: SupplyCategoryType;
   location: SupplyLocationType;
   manufacturer?: string;
@@ -106,9 +106,12 @@ export type InventoryItem = SupplyItem | FoodItem;
 export const SUPPLY_CATEGORIES = Object.values(SUPPLY_CATEGORY);
 export const FOOD_CATEGORIES = Object.values(FOOD_CATEGORY);
 
-export const LOCATIONS = {
-  supplies: Object.values(SUPPLY_LOCATION),
-  food: Object.values(FOOD_LOCATION),
+export const LOCATIONS: Record<
+  `${Lowercase<InventoryType>}`,
+  $Enums.SupplyLocation[] | $Enums.FoodLocation[]
+> = {
+  supply: Object.values($Enums.SupplyLocation),
+  food: Object.values($Enums.FoodLocation),
 } as const;
 
 /**
@@ -116,7 +119,7 @@ export const LOCATIONS = {
  */
 export const ENUM_MAPPINGS = {
   type: {
-    supplies: '물품',
+    supply: '물품',
     food: '식재료',
   },
   status: INVENTORY_STATUS,

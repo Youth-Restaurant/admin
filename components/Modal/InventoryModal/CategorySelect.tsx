@@ -8,11 +8,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { SUPPLY_CATEGORIES, FOOD_CATEGORIES } from '@/types/inventory';
+import {
+  SUPPLY_CATEGORIES,
+  FOOD_CATEGORIES,
+  InventoryType,
+} from '@/types/inventory';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
 
 type CategorySelectProps = {
-  selectedTab: 'supplies' | 'food';
+  selectedTab: InventoryType;
   value: string;
   onChange: (e: { name: string; value: string }) => void;
   required?: boolean;
@@ -25,7 +29,7 @@ export function CategorySelect({
   required = false,
 }: CategorySelectProps) {
   const categories =
-    selectedTab === 'supplies' ? SUPPLY_CATEGORIES : FOOD_CATEGORIES;
+    selectedTab === 'supply' ? SUPPLY_CATEGORIES : FOOD_CATEGORIES;
 
   return (
     <div className='space-y-2'>

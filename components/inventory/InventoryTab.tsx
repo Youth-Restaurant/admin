@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 type InventoryTabProps = {
   isLoading: boolean;
-  selectedTab: 'supplies' | 'food';
+  selectedTab: InventoryType;
   onTabChange(value: InventoryType): void;
 };
 
@@ -20,8 +20,8 @@ export default function InventoryTab({
       onValueChange={(value) => onTabChange(value as InventoryType)}
     >
       <TabsList className='grid w-full grid-cols-2'>
-        <TabsTrigger value='supplies' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'supplies')}
+        <TabsTrigger value='supply' disabled={isLoading}>
+          {convertEnumToDisplay('type', 'supply')}
         </TabsTrigger>
         <TabsTrigger value='food' disabled={isLoading}>
           {convertEnumToDisplay('type', 'food')}
