@@ -49,7 +49,7 @@ type FormState = Record<InventoryType, UploadSupplyItem | UploadFoodItem>;
 const getCommonFields = (updatedBy: string): CommonFields => ({
   name: '',
   quantity: 0,
-  status: '충분' as const,
+  status: 'SUFFICIENT' as const,
   updatedBy,
   memo: '',
   imageUrl: '',

@@ -17,8 +17,7 @@ export const INVENTORY_STATUS = {
   LOW: '부족',
 } as const satisfies Record<$Enums.InventoryStatus, string>;
 
-export type InventoryStatus =
-  (typeof INVENTORY_STATUS)[keyof typeof INVENTORY_STATUS];
+export type InventoryStatus = $Enums.InventoryStatus;
 
 export const SUPPLY_CATEGORY = {
   CLEANING: '청소용품',
