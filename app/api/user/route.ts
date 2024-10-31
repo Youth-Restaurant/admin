@@ -4,18 +4,15 @@ import prisma from '@/lib/prisma';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const nickname = searchParams.get('nickname');
+  const id = searchParams.get('id');
 
-  if (!nickname) {
-    return NextResponse.json(
-      { error: 'Nickname is required' },
-      { status: 400 }
-    );
+  if (!id) {
+    return NextResponse.json({ error: 'Id is required' }, { status: 400 });
   }
 
   try {
     const user = await prisma.user.findUnique({
-      where: { nickname },
+      where: { id },
       select: { role: true },
     });
 

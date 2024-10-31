@@ -58,19 +58,19 @@ enum Role {
 }
 
 model User {
-  id        String      @id @default(cuid())
-  nickname  String      @unique
-  email     String?
-  image     String?
+  id        String      @id @unique
+  // nickname  String
+  // image     String?
   role      Role        @default(STUDENT)
   posts     Post[]
   inventory Inventory[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  // email     String?
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String
   role      Role
   content   String   @db.Text

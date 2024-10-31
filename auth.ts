@@ -7,6 +7,7 @@ type KakaoAccount = {
   profile_nickname_needs_agreement: boolean;
   profile_image_needs_agreement: boolean;
   profile: {
+    id: string;
     nickname: string;
     thumbnail_image_url: string;
     profile_image_url: string;
@@ -36,6 +37,7 @@ declare module 'next-auth' {
   interface Profile {
     connected_at: string;
     properties: {
+      id: string;
       nickname: string;
       profile_image?: string;
       thumbnail_image?: string;
@@ -44,6 +46,7 @@ declare module 'next-auth' {
       profile_nickname_needs_agreement?: boolean;
       profile_image_needs_agreement?: boolean;
       profile?: {
+        id: string;
         nickname: string;
         thumbnail_image_url?: string;
         profile_image_url?: string;
@@ -67,20 +70,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider === 'kakao' && profile) {
+    async signIn({ account, profile, user }) {
+      if (account?.provider === 'kakao' && profile && user.id) {
+        const id = user.id;
         try {
           await prisma.user.upsert({
-            where: {
-              nickname: profile.properties.nickname,
-            },
+            where: { id },
             update: {
-              image: profile.properties.profile_image || null,
+              // image: profile_image || null,
             },
             create: {
-              nickname: profile.properties.nickname,
-              image: profile.properties.profile_image || null,
-              email: profile.kakao_account?.email,
+              id,
+              // nickname,
+              // image: profile_image || null,
+              // email: profile.kakao_account?.email,
               role: 'UNKNOWN',
             },
           });
@@ -95,14 +98,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       try {
         if (token.kakao_account && !token.role) {
-          // role이 없을 때만 API 호출
-          const nickname = (token.kakao_account as KakaoAccount).profile
-            .nickname;
-
           const response = await fetch(
-            `${process.env.AUTH_URL}/api/user?nickname=${encodeURIComponent(
-              nickname
-            )}`
+            `${process.env.AUTH_URL}/api/user?id=${token.id}`
           );
 
           if (!response.ok) {
@@ -132,6 +129,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         // token에 저장된 role 사용
         session.user.role = token.role as $Enums.Role;
+        session.user.id = token.sub!;
+
+        console.log('session', session);
       }
 
       return session;

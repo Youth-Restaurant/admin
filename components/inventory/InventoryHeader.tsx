@@ -36,9 +36,9 @@ export default function InventoryHeader({
   onUpload,
 }: InventoryHeaderProps) {
   const session = useSession();
-  const nickname = session.data?.user.nickname;
+  const id = session.data?.user.id;
 
-  if (nickname === undefined) return null;
+  if (id === undefined) return null;
 
   return (
     <div className='sticky top-0 bg-white p-4 z-10 border-b'>
@@ -51,7 +51,7 @@ export default function InventoryHeader({
         <InventoryUploadModal
           isLoading={isLoading}
           onSubmit={onUpload}
-          updatedBy={nickname}
+          updatedBy={id}
         />
       </div>
 
