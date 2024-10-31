@@ -80,12 +80,12 @@ export default function InventoryHeader({
             }`}
             onClick={() => onLocationChange(location)}
           >
-            {selectedTab === 'supply' &&
+            {selectedTab === 'SUPPLY' &&
               convertEnumToDisplay(
                 'supplyLocation',
                 location as SupplyLocation
               )}
-            {selectedTab === 'food' &&
+            {selectedTab === 'FOOD' &&
               convertEnumToDisplay('foodLocation', location as FoodLocation)}
           </Badge>
         ))}

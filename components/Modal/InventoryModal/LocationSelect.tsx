@@ -7,11 +7,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { InventoryType, LOCATIONS } from '@/types/inventory';
+import { LOCATIONS } from '@/types/inventory';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
+import { $Enums } from '@prisma/client';
 
 type LocationSelectProps = {
-  selectedTab: InventoryType;
+  selectedTab: $Enums.InventoryType;
   value: string;
   onChange: (e: { name: string; value: string }) => void;
   required?: boolean;

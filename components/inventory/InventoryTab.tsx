@@ -1,11 +1,12 @@
 // /components/inventory/InventoryTab.tsx
 import { convertEnumToDisplay, InventoryType } from '@/types/inventory';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import { $Enums } from '@prisma/client';
 
 type InventoryTabProps = {
   isLoading: boolean;
-  selectedTab: InventoryType;
-  onTabChange(value: InventoryType): void;
+  selectedTab: $Enums.InventoryType;
+  onTabChange(value: $Enums.InventoryType): void;
 };
 
 export default function InventoryTab({
@@ -17,14 +18,14 @@ export default function InventoryTab({
     <Tabs
       value={selectedTab}
       className='mb-4'
-      onValueChange={(value) => onTabChange(value as InventoryType)}
+      onValueChange={(value) => onTabChange(value as $Enums.InventoryType)}
     >
       <TabsList className='grid w-full grid-cols-2'>
-        <TabsTrigger value='supply' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'supply')}
+        <TabsTrigger value='SUPPLY' disabled={isLoading}>
+          {convertEnumToDisplay('type', 'SUPPLY')}
         </TabsTrigger>
-        <TabsTrigger value='food' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'food')}
+        <TabsTrigger value='FOOD' disabled={isLoading}>
+          {convertEnumToDisplay('type', 'FOOD')}
         </TabsTrigger>
       </TabsList>
     </Tabs>

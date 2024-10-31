@@ -31,6 +31,7 @@ import { FoodFields } from './FoodFields';
 import ImageUploader from '@/components/ImageUploader';
 import InventoryTab from '@/components/inventory/InventoryTab';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
+import { $Enums } from '@prisma/client';
 
 type InventoryUploadModalProps = {
   isLoading?: boolean;
@@ -43,10 +44,7 @@ type CommonFields = Pick<
   'name' | 'quantity' | 'status' | 'updatedBy' | 'memo' | 'imageUrl'
 >;
 
-type FormState = {
-  supply: UploadSupplyItem;
-  food: UploadFoodItem;
-};
+type FormState = Record<InventoryType, UploadSupplyItem | UploadFoodItem>;
 
 const getCommonFields = (updatedBy: string): CommonFields => ({
   name: '',
@@ -58,9 +56,9 @@ const getCommonFields = (updatedBy: string): CommonFields => ({
 });
 
 const getTypeSpecificFields = (type: InventoryType) => {
-  if (type === 'supply') {
+  if (type === 'SUPPLY') {
     return {
-      type: 'supply' as const,
+      type: 'SUPPLY' as const,
       location: '' as SupplyLocationType,
       category: '' as SupplyCategoryType,
       manufacturer: '',
@@ -68,7 +66,7 @@ const getTypeSpecificFields = (type: InventoryType) => {
     };
   } else {
     return {
-      type: 'food' as const,
+      type: 'FOOD' as const,
       location: '' as FoodLocationType,
       category: '' as FoodCategoryType,
       expirationDate: '',
@@ -104,7 +102,8 @@ export default function InventoryUploadModal({
 }: InventoryUploadModalProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<InventoryType>('supply');
+  const [selectedTab, setSelectedTab] =
+    useState<$Enums.InventoryType>('SUPPLY');
   const [commonFields, setCommonFields] = useState<CommonFields>(
     getCommonFields(updatedBy)
   );
@@ -130,16 +129,15 @@ export default function InventoryUploadModal({
     return commonFieldsValid && typeSpecificFieldsValid;
   }, [commonFields, typeSpecificFields]);
 
-  const handleTabChange = (value: string) => {
-    const inventoryType = value as InventoryType;
-    setSelectedTab(inventoryType);
-    setTypeSpecificFields(getTypeSpecificFields(inventoryType));
+  const handleTabChange = (value: $Enums.InventoryType) => {
+    setSelectedTab(value);
+    setTypeSpecificFields(getTypeSpecificFields(value));
   };
 
   const resetForm = useCallback(() => {
-    setSelectedTab('supply');
+    setSelectedTab('SUPPLY');
     setCommonFields(getCommonFields(updatedBy));
-    setTypeSpecificFields(getTypeSpecificFields('supply'));
+    setTypeSpecificFields(getTypeSpecificFields('SUPPLY'));
   }, [updatedBy]);
 
   const handleOpenChange = useCallback(
@@ -320,10 +318,10 @@ export default function InventoryUploadModal({
             </div>
           </div>
 
-          {typeSpecificFields.type === 'supply' && (
+          {typeSpecificFields.type === 'SUPPLY' && (
             <SupplyFields fields={typeSpecificFields} onChange={handleChange} />
           )}
-          {typeSpecificFields.type === 'food' && (
+          {typeSpecificFields.type === 'FOOD' && (
             <FoodFields fields={typeSpecificFields} onChange={handleChange} />
           )}
         </form>

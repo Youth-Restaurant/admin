@@ -7,7 +7,7 @@ import { $Enums } from '@prisma/client';
 /**
  * 재고 타입 (물품/식재료)
  */
-export type InventoryType = Lowercase<$Enums.InventoryType>;
+export type InventoryType = $Enums.InventoryType;
 
 /**
  * Enum 한글 매핑
@@ -81,7 +81,7 @@ interface BaseInventoryItem {
  * 물품 타입
  */
 export interface SupplyItem extends BaseInventoryItem {
-  type: 'supply';
+  type: typeof $Enums.InventoryType.SUPPLY;
   category: SupplyCategoryType;
   location: SupplyLocationType;
   manufacturer?: string;
@@ -92,7 +92,7 @@ export interface SupplyItem extends BaseInventoryItem {
  * 식재료 타입
  */
 export interface FoodItem extends BaseInventoryItem {
-  type: 'food';
+  type: typeof $Enums.InventoryType.FOOD;
   category: FoodCategoryType;
   location: FoodLocationType;
   expirationDate?: string;
@@ -107,11 +107,11 @@ export const SUPPLY_CATEGORIES = Object.values(SUPPLY_CATEGORY);
 export const FOOD_CATEGORIES = Object.values(FOOD_CATEGORY);
 
 export const LOCATIONS: Record<
-  `${Lowercase<InventoryType>}`,
+  $Enums.InventoryType,
   $Enums.SupplyLocation[] | $Enums.FoodLocation[]
 > = {
-  supply: Object.values($Enums.SupplyLocation),
-  food: Object.values($Enums.FoodLocation),
+  SUPPLY: Object.values($Enums.SupplyLocation),
+  FOOD: Object.values($Enums.FoodLocation),
 } as const;
 
 /**
@@ -119,8 +119,8 @@ export const LOCATIONS: Record<
  */
 export const ENUM_MAPPINGS = {
   type: {
-    supply: '물품',
-    food: '식재료',
+    SUPPLY: '물품',
+    FOOD: '식재료',
   },
   status: INVENTORY_STATUS,
   supplyCategory: SUPPLY_CATEGORY,

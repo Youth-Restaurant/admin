@@ -29,7 +29,7 @@ export function CategorySelect({
   required = false,
 }: CategorySelectProps) {
   const categories =
-    selectedTab === 'supply' ? SUPPLY_CATEGORIES : FOOD_CATEGORIES;
+    selectedTab === 'SUPPLY' ? SUPPLY_CATEGORIES : FOOD_CATEGORIES;
 
   return (
     <div className='space-y-2'>

@@ -1,20 +1,21 @@
+import { $Enums } from '@prisma/client';
 // hooks/useInventoryState.ts
 import { useState } from 'react';
 import {
   InventoryItem,
-  InventoryType,
   UploadSupplyItem,
   UploadFoodItem,
 } from '@/types/inventory';
 
 export function useInventoryState() {
-  const [selectedTab, setSelectedTab] = useState<InventoryType>('supply');
+  const [selectedTab, setSelectedTab] =
+    useState<$Enums.InventoryType>('SUPPLY');
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTabChange = async (tab: InventoryType) => {
+  const handleTabChange = async (tab: $Enums.InventoryType) => {
     setSelectedTab(tab);
     setSelectedLocation('전체');
     setIsLoading(true);
