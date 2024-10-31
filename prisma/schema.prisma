@@ -70,8 +70,8 @@ model User {
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  name      String
+  id        Int      @id @default(autoincrement())
+  author    String
   role      Role
   content   String   @db.Text
   createdAt DateTime @default(now())

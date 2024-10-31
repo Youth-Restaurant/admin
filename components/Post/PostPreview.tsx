@@ -1,10 +1,9 @@
 import { Card, CardContent } from '../ui/card';
 import { Calendar } from 'lucide-react';
-import { Post } from '@/types/post';
 import { formatDate } from '@/utils/date';
 import { Badge, BadgeVariant } from '../ui/badge';
 import Link from 'next/link';
-import { $Enums } from '@prisma/client';
+import { $Enums, Post } from '@prisma/client';
 import AvatarIcon from '../AvatarIcon';
 
 type Props = {
@@ -38,7 +37,7 @@ const getRoleDisplayName = (role: $Enums.Role): string => {
 };
 
 const PostPreview = ({ post }: Props) => {
-  const { id, name, role, content, createdAt, avatarUrl } = post;
+  const { id, author, role, content, createdAt, avatarUrl } = post;
   const roleColors = getRoleBadgeVariant(role);
 
   return (
@@ -47,12 +46,12 @@ const PostPreview = ({ post }: Props) => {
         <CardContent className='pt-6'>
           <div className='flex items-start gap-4'>
             {/* Profile Image */}
-            <AvatarIcon avatarUrl={avatarUrl} name={name} role={role} />
+            <AvatarIcon avatarUrl={avatarUrl} name={author} role={role} />
             {/* Content */}
             <div className='flex-1'>
               {/* Username */}
               <h2 className='text-lg font-semibold mb-2 flex gap-2 items-center'>
-                {name}{' '}
+                {author}{' '}
                 <Badge variant={roleColors} className={`font-bold text-white`}>
                   {getRoleDisplayName(role)}
                 </Badge>

@@ -12,10 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { getRoleBadgeVariant, getRoleDisplayName } from '@/utils/role';
-import { User } from '@prisma/client';
+import { Session } from 'next-auth';
 
 interface CreatePostButtonProps {
-  user: Pick<User, 'nickname' | 'role' | 'image'>;
+  user: Pick<Session['user'], 'nickname' | 'role' | 'image'>;
 }
 
 export default function CreatePostButton({ user }: CreatePostButtonProps) {
@@ -34,7 +34,7 @@ export default function CreatePostButton({ user }: CreatePostButtonProps) {
       const response = await fetch('api/notice', {
         method: 'POST',
         body: JSON.stringify({
-          name: user.nickname,
+          author: user.nickname,
           role: user.role,
           content: formData.get('content'),
           avatarUrl: user.image || '/default-avatar.png',
