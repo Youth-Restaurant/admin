@@ -14,11 +14,11 @@ import { Label } from '@/components/ui/label';
 import { getRoleBadgeVariant, getRoleDisplayName } from '@/utils/role';
 import { Session } from 'next-auth';
 
-interface CreatePostButtonProps {
-  user: Pick<Session['user'], 'nickname' | 'role' | 'image'>;
+interface CreateNoticeButtonProps {
+  user: Pick<Session['user'], 'id' | 'nickname' | 'role' | 'image'>;
 }
 
-export default function CreatePostButton({ user }: CreatePostButtonProps) {
+export default function CreateNoticeButton({ user }: CreateNoticeButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
@@ -38,6 +38,7 @@ export default function CreatePostButton({ user }: CreatePostButtonProps) {
           role: user.role,
           content: formData.get('content'),
           avatarUrl: user.image || '/default-avatar.png',
+          userId: user.id,
         }),
         headers: {
           'Content-Type': 'application/json',

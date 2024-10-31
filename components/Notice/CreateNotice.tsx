@@ -1,8 +1,8 @@
 // 서버 컴포넌트
 import { auth } from '@/auth';
-import CreatePostButton from './CreatePostButton';
+import CreatePostButton from './CreateNoticeButton';
 
-export default async function CreatePost() {
+export default async function CreateNotice() {
   const session = await auth();
 
   if (!session) {

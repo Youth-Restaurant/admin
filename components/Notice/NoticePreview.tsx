@@ -3,11 +3,11 @@ import { Calendar } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 import { Badge, BadgeVariant } from '../ui/badge';
 import Link from 'next/link';
-import { $Enums, Post } from '@prisma/client';
+import { $Enums, Notice } from '@prisma/client';
 import AvatarIcon from '../AvatarIcon';
 
 type Props = {
-  post: Post;
+  notice: Notice;
 };
 
 const getRoleBadgeVariant = (role: $Enums.Role): BadgeVariant => {
@@ -36,8 +36,8 @@ const getRoleDisplayName = (role: $Enums.Role): string => {
   return displayNames[role];
 };
 
-const PostPreview = ({ post }: Props) => {
-  const { id, author, role, content, createdAt, avatarUrl } = post;
+const NoticePreview = ({ notice }: Props) => {
+  const { id, author, role, content, createdAt, avatarUrl } = notice;
   const roleColors = getRoleBadgeVariant(role);
 
   return (
@@ -73,4 +73,4 @@ const PostPreview = ({ post }: Props) => {
   );
 };
 
-export default PostPreview;
+export default NoticePreview;

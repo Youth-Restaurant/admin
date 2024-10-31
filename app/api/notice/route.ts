@@ -6,11 +6,11 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     console.log(data);
-    const post = await prisma.post.create({
+    const notice = await prisma.notice.create({
       data,
     });
 
-    return NextResponse.json(post);
+    return NextResponse.json(notice);
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
@@ -18,12 +18,12 @@ export async function POST(request: Request) {
 // GET 요청 처리 예시 (최신순 정렬)
 export async function GET() {
   try {
-    const posts = await prisma.post.findMany({
+    const notices = await prisma.notice.findMany({
       orderBy: {
         createdAt: 'desc',
       },
     });
-    return NextResponse.json(posts);
+    return NextResponse.json(notices);
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }

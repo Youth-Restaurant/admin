@@ -130,8 +130,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // token에 저장된 role 사용
         session.user.role = token.role as $Enums.Role;
         session.user.id = token.sub!;
-
-        console.log('session', session);
       }
 
       return session;
