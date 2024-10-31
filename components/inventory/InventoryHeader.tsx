@@ -56,7 +56,7 @@ export default function InventoryHeader({
       <InventoryTab
         isLoading={isLoading}
         selectedTab={selectedTab}
-        onTabChange={(value) => onTabChange(value as InventoryType)}
+        onTabChange={(value) => onTabChange(value)}
       />
 
       <div className='flex gap-2 overflow-x-auto hide-scrollbar'>
