@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { X, Upload, Loader2 } from 'lucide-react';
+import { X, Loader2, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,7 +59,6 @@ export default function ImageUploader({
   maxUploadSizeMB = 5,
   maxWidthOrHeight = 1920,
 }: ImageUploaderProps) {
-  // useImageUpload 훅을 사용하여 이미지 업로드 관련 상태와 핸들러 관리
   const { previewUrl, isLoading, handleImageSelect, handleImageRemove } =
     useImageUpload({
       maxSizeMB,
@@ -69,12 +68,6 @@ export default function ImageUploader({
       onUploadError: () => onImageRemove(),
     });
 
-  /**
-   * 파일 입력 변경 이벤트 핸들러
-   * 선택된 파일이 있는 경우 이미지 업로드 프로세스를 시작합니다.
-   *
-   * @param e - 파일 입력 변경 이벤트
-   */
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -87,28 +80,17 @@ export default function ImageUploader({
 
   return (
     <TooltipProvider>
-      {/* 전체 컴포넌트를 감싸는 카드 */}
-      <Card className='w-full'>
-        <CardContent className='p-3'>
-          {/* 이미지가 업로드된 경우 미리보기 표시 */}
-          {previewUrl ? (
-            <div className='relative flex justify-center'>
-              {/* 이미지 미리보기 컨테이너 */}
-              <div className='relative w-32 h-32 rounded-md overflow-hidden'>
-                <Image
-                  src={previewUrl}
-                  alt='Preview'
-                  fill
-                  className='object-cover'
-                />
-              </div>
-              {/* 이미지 제거 버튼 */}
+      <Card className='w-[70px]'>
+        <CardContent className='p-0'>
+          <div className='relative'>
+            {/* X 버튼을 label 밖으로 이동 */}
+            {previewUrl && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     size='icon'
                     variant='secondary'
-                    className='absolute -top-2 -right-2 h-6 w-6 rounded-full'
+                    className='absolute -top-2 -right-2 h-6 w-6 rounded-full z-10'
                     onClick={handleImageRemove}
                   >
                     <X className='h-3 w-3' />
@@ -118,37 +100,45 @@ export default function ImageUploader({
                   <p>이미지 제거</p>
                 </TooltipContent>
               </Tooltip>
-            </div>
-          ) : (
-            // 이미지가 없는 경우 업로드 인터페이스 표시
-            <label className='relative block'>
-              {/* 파일 선택 영역 */}
-              <div className='flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-md border-muted-foreground/25 hover:border-muted-foreground/40 transition-colors cursor-pointer'>
-                {/* 숨겨진 파일 입력 */}
-                <input
-                  type='file'
-                  className='hidden'
-                  accept='image/*' // 이미지 파일만 허용
-                  onChange={handleFileChange}
-                  disabled={isLoading}
-                />
-                {/* 로딩 상태 또는 업로드 안내 표시 */}
-                {isLoading ? (
-                  <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
-                ) : (
-                  <div className='flex flex-col items-center gap-1.5'>
-                    <Upload className='h-6 w-6 text-muted-foreground' />
-                    <span className='text-sm text-muted-foreground font-medium'>
-                      이미지 업로드
-                    </span>
-                    <span className='text-xs text-muted-foreground/70'>
-                      이미지 파일 ({maxUploadSizeMB}MB 이하)
-                    </span>
+            )}
+            {/* 파일 선택을 위한 label과 input */}
+            <label className='block'>
+              <input
+                type='file'
+                className='hidden'
+                accept='image/*'
+                onChange={handleFileChange}
+                disabled={isLoading}
+              />
+              {previewUrl ? (
+                <div className='relative w-[70px] h-[70px]'>
+                  <div className='w-full h-full cursor-pointer'>
+                    <Image
+                      src={previewUrl}
+                      alt='Preview'
+                      fill
+                      className={`object-cover rounded-md ${
+                        isLoading ? 'opacity-50' : ''
+                      }`}
+                    />
+                    {isLoading && (
+                      <div className='absolute inset-0 flex items-center justify-center bg-black/20 rounded-md'>
+                        <Loader2 className='h-6 w-6 animate-spin text-white' />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className='flex items-center justify-center w-[70px] h-[70px] bg-gray-100 hover:bg-gray-200 transition-colors rounded-md cursor-pointer'>
+                  {isLoading ? (
+                    <Loader2 className='h-6 w-6 animate-spin text-gray-400' />
+                  ) : (
+                    <Plus className='h-6 w-6 text-gray-400' />
+                  )}
+                </div>
+              )}
             </label>
-          )}
+          </div>
         </CardContent>
       </Card>
     </TooltipProvider>

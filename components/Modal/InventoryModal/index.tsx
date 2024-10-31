@@ -81,7 +81,7 @@ const getTypeSpecificFields = (type: InventoryType) => {
 };
 
 const dialogContentClassName =
-  'w-[min(calc(100vw-40px),460px)] max-h-[85vh] overflow-y-auto hide-scrollbar';
+  'w-[min(calc(100vw-40px),460px)] max-h-[85vh] overflow-hidden';
 
 export default function InventoryUploadModal({
   isLoading = false,
@@ -167,18 +167,42 @@ export default function InventoryUploadModal({
           추가
         </Button>
       </DialogTrigger>
-      <DialogContent className={dialogContentClassName}>
-        <DialogHeader>
-          <DialogTitle>재고 추가</DialogTitle>
+      <DialogContent className={`${dialogContentClassName} [&>button]:hidden`}>
+        <DialogHeader className='flex-none'>
+          <div className='flex items-center justify-between mb-4'>
+            <DialogTitle>재고 추가</DialogTitle>
+            <div className='flex gap-2'>
+              <Button
+                type='button'
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+                className='bg-red-400 hover:bg-red-500'
+              >
+                취소
+              </Button>
+              <Button
+                type='submit'
+                form='inventory-form'
+                disabled={isSubmitting}
+                className='bg-blue-500 hover:bg-blue-600'
+              >
+                {isSubmitting ? '처리중...' : '저장'}
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
 
-        <InventoryTab
-          isLoading={isLoading}
-          selectedTab={selectedTab}
-          onTabChange={handleTabChange}
-        />
+        <form
+          id='inventory-form'
+          onSubmit={handleSubmit}
+          className='space-y-4 overflow-y-auto max-h-[calc(85vh-120px)] scrollbar-hide px-4'
+        >
+          <InventoryTab
+            isLoading={isLoading}
+            selectedTab={selectedTab}
+            onTabChange={handleTabChange}
+          />
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
           <div className='pb-2'>
             <ImageUploader
               onImageUpload={handleImageUpload}
@@ -260,24 +284,6 @@ export default function InventoryUploadModal({
           {typeSpecificFields.type === 'food' && (
             <FoodFields fields={typeSpecificFields} onChange={handleChange} />
           )}
-
-          <div className='flex justify-end gap-2 pt-4'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => setOpen(false)}
-              disabled={isSubmitting}
-            >
-              취소
-            </Button>
-            <Button
-              type='submit'
-              disabled={isSubmitting}
-              className='bg-blue-500 hover:bg-blue-600'
-            >
-              {isSubmitting ? '처리중...' : '저장'}
-            </Button>
-          </div>
         </form>
       </DialogContent>
     </Dialog>
