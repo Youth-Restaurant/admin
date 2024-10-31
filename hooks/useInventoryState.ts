@@ -20,7 +20,7 @@ export function useInventoryState() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/inventory?type=${tab}`);
+      const response = await fetch(`/api/inventory?type=${tab.toUpperCase()}`);
       const data = await response.json();
       setItems(data);
     } catch (error) {
@@ -45,7 +45,9 @@ export function useInventoryState() {
         throw new Error('Failed to upload inventory');
       }
 
-      const updatedData = await fetch(`/api/inventory?type=${selectedTab}`);
+      const updatedData = await fetch(
+        `/api/inventory?type=${selectedTab.toUpperCase()}`
+      );
       const items = await updatedData.json();
       setItems(items);
     } catch (error) {

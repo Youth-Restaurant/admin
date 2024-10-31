@@ -1,15 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Upload } from 'lucide-react';
 import {
   UploadSupplyItem,
@@ -37,13 +40,7 @@ type InventoryUploadModalProps = {
 
 type CommonFields = Pick<
   InventoryItem,
-  | 'name'
-  | 'quantity'
-  | 'status'
-  | 'updatedBy'
-  | 'memo'
-  | 'minimumQuantity'
-  | 'imageUrl'
+  'name' | 'quantity' | 'status' | 'updatedBy' | 'memo' | 'imageUrl'
 >;
 
 type FormState = {
@@ -57,7 +54,6 @@ const getCommonFields = (updatedBy: string): CommonFields => ({
   status: '충분' as const,
   updatedBy,
   memo: '',
-  minimumQuantity: 0,
   imageUrl: '',
 });
 
@@ -83,6 +79,24 @@ const getTypeSpecificFields = (type: InventoryType) => {
 const dialogContentClassName =
   'w-[min(calc(100vw-40px),460px)] max-h-[85vh] overflow-hidden';
 
+const isValidName = (name: string): boolean => {
+  if (name.trim().length === 0) return false;
+
+  const incompleteHangulRegex = /^[ㄱ-ㅎㅏ-ㅣ]+$/;
+  if (incompleteHangulRegex.test(name)) return false;
+
+  const specialCharsRegex = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]+$/;
+  if (specialCharsRegex.test(name)) return false;
+
+  const numbersOnlyRegex = /^\d+$/;
+  if (numbersOnlyRegex.test(name)) return false;
+
+  const whitespaceRegex = /^\s+$/;
+  if (whitespaceRegex.test(name)) return false;
+
+  return true;
+};
+
 export default function InventoryUploadModal({
   isLoading = false,
   onSubmit,
@@ -105,11 +119,40 @@ export default function InventoryUploadModal({
     ...typeSpecificFields,
   } as FormState[typeof selectedTab];
 
+  // 필수 필드 검증
+  const isFormValid = useMemo(() => {
+    const commonFieldsValid = isValidName(commonFields.name);
+
+    const typeSpecificFieldsValid =
+      typeSpecificFields.location != null &&
+      typeSpecificFields.location.length > 0 &&
+      typeSpecificFields.category != null &&
+      typeSpecificFields.category.length > 0;
+
+    return commonFieldsValid && typeSpecificFieldsValid;
+  }, [commonFields, typeSpecificFields]);
+
   const handleTabChange = (value: string) => {
     const inventoryType = value as InventoryType;
     setSelectedTab(inventoryType);
     setTypeSpecificFields(getTypeSpecificFields(inventoryType));
   };
+
+  const resetForm = useCallback(() => {
+    setSelectedTab('supplies');
+    setCommonFields(getCommonFields(updatedBy));
+    setTypeSpecificFields(getTypeSpecificFields('supplies'));
+  }, [updatedBy]);
+
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        resetForm();
+      }
+      setOpen(newOpen);
+    },
+    [resetForm]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,9 +160,7 @@ export default function InventoryUploadModal({
 
     try {
       await onSubmit(formData);
-      setOpen(false);
-      setCommonFields(getCommonFields(updatedBy));
-      setTypeSpecificFields(getTypeSpecificFields(selectedTab));
+      handleOpenChange(false);
     } catch (error) {
       console.error('Failed to upload inventory:', error);
     } finally {
@@ -160,9 +201,12 @@ export default function InventoryUploadModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className='bg-blue-500 hover:bg-blue-600' disabled={isLoading}>
+        <Button
+          className='bg-blue-500 hover:bg-blue-600 focus-visible:ring-0 focus-visible:outline-none'
+          disabled={isLoading}
+        >
           <Upload className='w-4 h-4 mr-2' />
           추가
         </Button>
@@ -171,20 +215,23 @@ export default function InventoryUploadModal({
         <DialogHeader className='flex-none'>
           <div className='flex items-center justify-between mb-4'>
             <DialogTitle>재고 추가</DialogTitle>
+            <VisuallyHidden.Root>
+              <DialogDescription>재고 추가 폼입니다.</DialogDescription>
+            </VisuallyHidden.Root>
             <div className='flex gap-2'>
               <Button
                 type='button'
-                onClick={() => setOpen(false)}
+                onClick={() => handleOpenChange(false)}
                 disabled={isSubmitting}
-                className='bg-red-400 hover:bg-red-500'
+                className='bg-red-400 hover:bg-red-500 focus-visible:ring-0 focus-visible:outline-none'
               >
                 취소
               </Button>
               <Button
                 type='submit'
                 form='inventory-form'
-                disabled={isSubmitting}
-                className='bg-blue-500 hover:bg-blue-600'
+                disabled={isSubmitting || !isFormValid}
+                className='bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 focus-visible:ring-0 focus-visible:outline-none'
               >
                 {isSubmitting ? '처리중...' : '저장'}
               </Button>
@@ -195,7 +242,7 @@ export default function InventoryUploadModal({
         <form
           id='inventory-form'
           onSubmit={handleSubmit}
-          className='space-y-4 overflow-y-auto max-h-[calc(85vh-120px)] scrollbar-hide px-4'
+          className='space-y-4 overflow-y-auto max-h-[calc(85vh-120px)] scrollbar-hide px-4 pb-8'
         >
           <InventoryTab
             isLoading={isLoading}
@@ -204,6 +251,10 @@ export default function InventoryUploadModal({
           />
 
           <div className='pb-2'>
+            <div className='flex items-center gap-1 mb-2'>
+              <Label>사진</Label>
+              <span className='text-xs text-gray-500'>(비필수)</span>
+            </div>
             <ImageUploader
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
@@ -227,21 +278,6 @@ export default function InventoryUploadModal({
             />
           </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='quantity' className='flex items-center'>
-              수량
-              <RequiredIndicator />
-            </Label>
-            <Input
-              id='quantity'
-              name='quantity'
-              required
-              value={commonFields.quantity}
-              onChange={handleChange}
-              placeholder='수량을 입력하세요'
-            />
-          </div>
-
           <LocationSelect
             selectedTab={selectedTab}
             value={typeSpecificFields.location}
@@ -256,26 +292,34 @@ export default function InventoryUploadModal({
             required
           />
 
-          <div className='space-y-2'>
-            <Label htmlFor='minimumQuantity'>최소 보유량</Label>
-            <Input
-              id='minimumQuantity'
-              name='minimumQuantity'
-              value={commonFields.minimumQuantity}
-              onChange={handleChange}
-              placeholder='최소 보유량을 입력하세요'
-            />
-          </div>
+          <div className='mt-6 space-y-4'>
+            <div className='text-sm text-gray-500 font-medium border-b pb-2'>
+              선택사항
+            </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='memo'>메모</Label>
-            <Input
-              id='memo'
-              name='memo'
-              value={commonFields.memo}
-              onChange={handleChange}
-              placeholder='메모를 입력하세요'
-            />
+            <div className='space-y-2'>
+              <Label htmlFor='quantity'>수량</Label>
+              <Input
+                id='quantity'
+                name='quantity'
+                value={commonFields.quantity}
+                onChange={handleChange}
+                placeholder='수량을 입력하세요'
+                type='number'
+                min='0'
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='memo'>메모</Label>
+              <Input
+                id='memo'
+                name='memo'
+                value={commonFields.memo}
+                onChange={handleChange}
+                placeholder='메모를 입력하세요'
+              />
+            </div>
           </div>
 
           {typeSpecificFields.type === 'supplies' && (
