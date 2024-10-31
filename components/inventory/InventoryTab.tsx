@@ -1,10 +1,11 @@
 // /components/inventory/InventoryTab.tsx
+import { convertEnumToDisplay, InventoryType } from '@/types/inventory';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 type InventoryTabProps = {
   isLoading: boolean;
   selectedTab: 'supplies' | 'food';
-  onTabChange(value: 'supplies' | 'food'): void;
+  onTabChange(value: InventoryType): void;
 };
 
 export default function InventoryTab({
@@ -16,14 +17,14 @@ export default function InventoryTab({
     <Tabs
       value={selectedTab}
       className='mb-4'
-      onValueChange={(value) => onTabChange(value as 'supplies' | 'food')}
+      onValueChange={(value) => onTabChange(value as InventoryType)}
     >
       <TabsList className='grid w-full grid-cols-2'>
         <TabsTrigger value='supplies' disabled={isLoading}>
-          물품
+          {convertEnumToDisplay('type', 'supplies')}
         </TabsTrigger>
         <TabsTrigger value='food' disabled={isLoading}>
-          식재료
+          {convertEnumToDisplay('type', 'food')}
         </TabsTrigger>
       </TabsList>
     </Tabs>
