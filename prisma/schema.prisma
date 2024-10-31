@@ -7,10 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// InventoryType enum 수정
 enum InventoryType {
-  SUPPLIES @map("supplies") // 물품 타입
-  FOOD     @map("food") // 식재료 타입
+  SUPPLIES @map("물품")
+  FOOD     @map("식재료")
+}
+
+enum InventoryStatus {
+  SUFFICIENT @map("충분")
+  LOW        @map("부족")
+}
+
+enum SupplyCategory {
+  CLEANING   @map("청소용품")
+  DISPOSABLE @map("일회용품")
+  FURNITURE  @map("가구")
+  KITCHEN    @map("주방용품")
+  OFFICE     @map("사무용품")
+}
+
+enum FoodCategory {
+  VEGETABLE @map("채소")
+  MEAT      @map("육류")
+  SEAFOOD   @map("수산물")
+  SEASONING @map("조미료")
+  GRAIN     @map("곡물")
+  DAIRY     @map("유제품")
+  BEVERAGE  @map("음료")
+}
+
+enum SupplyLocation {
+  KITCHEN @map("주방")
+  HALL    @map("홀")
+  STORAGE @map("창고")
+}
+
+enum FoodLocation {
+  KITCHEN      @map("주방")
+  STORAGE      @map("창고")
+  REFRIGERATOR @map("냉장고")
 }
 
 enum Role {
@@ -23,61 +57,14 @@ enum Role {
   UNKNOWN     @map("직급")
 }
 
-enum InventoryStatus {
-  SUFFICIENT
-  LOW
-}
-
-enum SupplyCategory {
-  CLEANING
-  DISPOSABLE
-  FURNITURE
-  KITCHEN
-  OFFICE
-}
-
-enum FoodCategory {
-  VEGETABLE
-  MEAT
-  SEAFOOD
-  SEASONING
-  GRAIN
-  DAIRY
-  BEVERAGE
-}
-
-enum SupplyLocation {
-  KITCHEN
-  HALL
-  STORAGE
-}
-
-enum FoodLocation {
-  KITCHEN
-  STORAGE
-  REFRIGERATOR
-}
-
-// Enum 참조를 위한 테이블들
-model EnumReference {
-  id             Int            @id @default(autoincrement())
-  supplyCategory SupplyCategory
-  foodCategory   FoodCategory
-  supplyLocation SupplyLocation
-  foodLocation   FoodLocation
-  createdAt      DateTime       @default(now())
-
-  @@map("enum_reference")
-}
-
 model User {
   id        String      @id @default(cuid())
-  nickname  String      @unique // 카카오 닉네임
+  nickname  String      @unique
   email     String?
   image     String?
   role      Role        @default(STUDENT)
   posts     Post[]
-  inventory Inventory[] // 재고 항목과의 관계 추가
+  inventory Inventory[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
@@ -95,11 +82,10 @@ model Post {
   @@index([createdAt])
 }
 
-// 재고 모델
 model Inventory {
   id              Int             @id @default(autoincrement())
   name            String
-  type            InventoryType   @default(SUPPLIES) // String에서 InventoryType으로 변경
+  type            InventoryType   @default(SUPPLIES)
   quantity        Int             @default(-1)
   status          InventoryStatus @default(SUFFICIENT)
   location        String
@@ -111,11 +97,11 @@ model Inventory {
   memo            String?         @db.Text
   minimumQuantity Int?
 
-  // 물품 전용 필드
+  // Supply-specific fields
   manufacturer String?
   modelNumber  String?
 
-  // 식재료 전용 필드
+  // Food-specific fields
   expirationDate DateTime?
 
   createdAt DateTime @default(now())
@@ -126,4 +112,16 @@ model Inventory {
   @@index([location])
   @@index([updatedBy])
   @@index([status])
+}
+
+// Enum reference model for type safety
+model EnumReference {
+  id             Int            @id @default(autoincrement())
+  supplyCategory SupplyCategory
+  foodCategory   FoodCategory
+  supplyLocation SupplyLocation
+  foodLocation   FoodLocation
+  createdAt      DateTime       @default(now())
+
+  @@map("enum_reference")
 }
