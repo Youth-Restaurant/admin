@@ -17,8 +17,6 @@ import { Upload } from 'lucide-react';
 import {
   UploadSupplyItem,
   UploadFoodItem,
-  SupplyLocationType,
-  FoodLocationType,
   SupplyCategoryType,
   FoodCategoryType,
   InventoryType,
@@ -31,7 +29,7 @@ import { FoodFields } from './FoodFields';
 import ImageUploader from '@/components/ImageUploader';
 import InventoryTab from '@/components/inventory/InventoryTab';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
-import { $Enums } from '@prisma/client';
+import { $Enums, SupplyLocation, FoodLocation } from '@prisma/client';
 
 type InventoryUploadModalProps = {
   isLoading?: boolean;
@@ -66,7 +64,7 @@ const getTypeSpecificFields = (type: InventoryType) => {
   if (type === 'SUPPLY') {
     return {
       type: 'SUPPLY' as const,
-      location: '' as SupplyLocationType,
+      location: '' as SupplyLocation,
       category: '' as SupplyCategoryType,
       manufacturer: '',
       modelNumber: '',
@@ -74,7 +72,7 @@ const getTypeSpecificFields = (type: InventoryType) => {
   } else {
     return {
       type: 'FOOD' as const,
-      location: '' as FoodLocationType,
+      location: '' as FoodLocation,
       category: '' as FoodCategoryType,
       expirationDate: '',
     };
