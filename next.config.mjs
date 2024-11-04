@@ -6,6 +6,14 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'k.kakaocdn.net',
       },
+      {
+        protocol: 'http',
+        hostname: 'iksaneats.iptime.org',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
   },
   async headers() {

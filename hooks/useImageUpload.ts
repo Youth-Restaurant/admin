@@ -107,7 +107,7 @@ const uploadImage = async (file: File): Promise<string> => {
   formData.append('file', file);
   formData.append('extension', getFileExtension(file));
 
-  const response = await fetch('/api/upload', {
+  const response = await fetch('/api/storage', {
     method: 'POST',
     body: formData,
   });
@@ -226,10 +226,8 @@ export const useImageUpload = ({
         'MB)'
       );
 
-      const objectUrl = URL.createObjectURL(compressedFile);
-      setPreviewUrl(objectUrl);
-
       const imageUrl = await uploadImage(compressedFile);
+      setPreviewUrl(imageUrl);
       onUploadSuccess?.(imageUrl);
 
       toast({

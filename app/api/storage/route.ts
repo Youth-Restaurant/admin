@@ -1,10 +1,10 @@
-// pages/api/upload.ts 또는 app/api/upload/route.ts
+// pages/api/storage.ts 또는 app/api/storage/route.ts
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_FILE_STORAGE_URL}/upload`,
+      `${process.env.NEXT_PUBLIC_FILE_STORAGE_URL}/storage`,
       {
         method: 'POST',
         body: formData,
