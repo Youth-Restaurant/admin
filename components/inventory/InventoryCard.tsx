@@ -1,7 +1,11 @@
 // app/components/inventory/InventoryCard.tsx
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { convertEnumToDisplay, InventoryItem } from '@/types/inventory';
+import {
+  convertEnumToDisplay,
+  filterLocationEnumForDisplay,
+  InventoryItem,
+} from '@/types/inventory';
 
 type InventoryCardProps = {
   item: InventoryItem;
@@ -20,7 +24,7 @@ export default function InventoryCard({ item }: InventoryCardProps) {
               </Badge>
             </div>
             <div className='text-sm text-gray-500 space-y-1'>
-              <p>위치: {item.location}</p>
+              <p>위치: {filterLocationEnumForDisplay(item.location)}</p>
               <p>수량: {item.quantity}</p>
               <p className='text-xs'>
                 최종 수정: {new Date(item.lastUpdated).toLocaleDateString()} by{' '}
@@ -28,7 +32,9 @@ export default function InventoryCard({ item }: InventoryCardProps) {
               </p>
             </div>
           </div>
-          <Badge variant='outline'>{item.category}</Badge>
+          <Badge variant='outline' className='whitespace-nowrap'>
+            {item.category}
+          </Badge>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,4 @@
-import { $Enums } from '@prisma/client';
+import { $Enums, FoodLocation, SupplyLocation } from '@prisma/client';
 
 /**
  * /types/inventory.ts
@@ -83,7 +83,7 @@ interface BaseInventoryItem {
 export interface SupplyItem extends BaseInventoryItem {
   type: typeof $Enums.InventoryType.SUPPLY;
   category: SupplyCategoryType;
-  location: SupplyLocationType;
+  location: SupplyLocation;
   manufacturer?: string;
   modelNumber?: string;
 }
@@ -94,7 +94,7 @@ export interface SupplyItem extends BaseInventoryItem {
 export interface FoodItem extends BaseInventoryItem {
   type: typeof $Enums.InventoryType.FOOD;
   category: FoodCategoryType;
-  location: FoodLocationType;
+  location: FoodLocation;
   expirationDate?: string;
 }
 
@@ -169,4 +169,14 @@ export const isValidEnumValue = <T extends EnumType>(
   value: unknown
 ): value is EnumValue<T> => {
   return typeof value === 'string' && value in ENUM_MAPPINGS[type];
+};
+
+export const filterLocationEnumForDisplay = (
+  value: SupplyLocation | FoodLocation
+): string => {
+  if (value in SupplyLocation)
+    return convertEnumToDisplay('supplyLocation', value as SupplyLocation);
+  if (value in FoodLocation)
+    return convertEnumToDisplay('foodLocation', value as FoodLocation);
+  return '미등록 위치';
 };
