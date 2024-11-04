@@ -41,16 +41,23 @@ type InventoryUploadModalProps = {
 
 type CommonFields = Pick<
   InventoryItem,
-  'name' | 'quantity' | 'status' | 'updatedBy' | 'memo' | 'imageUrl'
+  | 'name'
+  | 'quantity'
+  | 'status'
+  | 'createdBy'
+  | 'memo'
+  | 'imageUrl'
+  | 'updatedBy'
 >;
 
 type FormState = Record<InventoryType, UploadSupplyItem | UploadFoodItem>;
 
-const getCommonFields = (updatedBy: string): CommonFields => ({
+const getCommonFields = (createdBy: string): CommonFields => ({
   name: '',
   quantity: 0,
   status: 'SUFFICIENT' as const,
-  updatedBy,
+  createdBy,
+  updatedBy: createdBy,
   memo: '',
   imageUrl: '',
 });

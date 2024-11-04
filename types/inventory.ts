@@ -67,8 +67,9 @@ export type FoodLocationType =
 interface BaseInventoryItem {
   id: number;
   name: string;
-  quantity: number;
+  quantity?: number;
   lastUpdated: string;
+  createdBy: string;
   updatedBy: string;
   status: InventoryStatus;
   memo?: string;

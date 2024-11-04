@@ -5,7 +5,7 @@ import { UploadFoodItem } from '@/types/inventory';
 
 type FoodFields = Omit<
   UploadFoodItem,
-  'name' | 'quantity' | 'updatedBy' | 'status'
+  'name' | 'quantity' | 'status' | 'createdBy' | 'updatedBy'
 >;
 
 type FoodFieldsProps = {

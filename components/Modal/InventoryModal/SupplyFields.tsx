@@ -4,7 +4,10 @@ import { Input } from '@/components/ui/input';
 import { UploadSupplyItem } from '@/types/inventory';
 
 type SupplyFieldsProps = {
-  fields: Omit<UploadSupplyItem, 'name' | 'quantity' | 'updatedBy' | 'status'>;
+  fields: Omit<
+    UploadSupplyItem,
+    'name' | 'quantity' | 'status' | 'createdBy' | 'updatedBy'
+  >;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 

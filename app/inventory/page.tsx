@@ -17,7 +17,7 @@ export default function InventoryPage() {
     setSelectedLocation,
     setSearchQuery,
     handleUpload,
-    handleTabChange,
+    setSelectedTab,
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
@@ -41,7 +41,7 @@ export default function InventoryPage() {
           selectedTab={selectedTab}
           selectedLocation={selectedLocation}
           searchQuery={searchQuery}
-          onTabChange={handleTabChange}
+          onTabChange={setSelectedTab}
           onLocationChange={setSelectedLocation}
           onSearchChange={setSearchQuery}
           isLoading={isLoading}

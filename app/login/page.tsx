@@ -1,4 +1,4 @@
-import { signIn, signOut } from '@/auth';
+import { signIn } from '@/auth';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 

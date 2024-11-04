@@ -9,12 +9,9 @@ export async function GET(request: Request) {
 
   try {
     const items = await prisma.inventory.findMany({
-      where: {
-        type: type,
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
+      where: { type: type },
+      include: { user: true },
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json(items);

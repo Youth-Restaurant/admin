@@ -24,7 +24,7 @@ export default function InventoryCard({ item }: InventoryCardProps) {
               <p>수량: {item.quantity}</p>
               <p className='text-xs'>
                 최종 수정: {new Date(item.lastUpdated).toLocaleDateString()} by{' '}
-                {item.updatedBy}
+                {item.createdBy}
               </p>
             </div>
           </div>

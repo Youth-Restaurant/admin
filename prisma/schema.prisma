@@ -58,15 +58,16 @@ enum Role {
 }
 
 model User {
-  id        String      @id @unique
+  id                     String                   @id @unique
   // nickname  String
   // image     String?
-  role      Role        @default(STUDENT)
-  notices   Notice[]
-  inventory Inventory[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  role                   Role                     @default(STUDENT)
+  notices                Notice[]
+  inventory              Inventory[]
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
   // email     String?
+  InventoryUpdateHistory InventoryUpdateHistory[]
 }
 
 model Notice {
@@ -86,14 +87,15 @@ model Inventory {
   id              Int             @id @default(autoincrement())
   name            String
   type            InventoryType   @default(SUPPLY)
-  quantity        Int             @default(-1)
+  quantity        Int?            @default(-1)
   status          InventoryStatus @default(SUFFICIENT)
   location        String
   category        String
   imageUrl        String?
   lastUpdated     DateTime        @default(now())
+  createdBy       String
   updatedBy       String
-  user            User            @relation(fields: [updatedBy], references: [id])
+  user            User            @relation(fields: [createdBy], references: [id])
   memo            String?         @db.Text
   minimumQuantity Int?
 
@@ -107,11 +109,27 @@ model Inventory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relation to update history
+  updateHistory InventoryUpdateHistory[]
+
   @@index([type])
   @@index([category])
   @@index([location])
-  @@index([updatedBy])
+  @@index([createdBy])
   @@index([status])
+}
+
+model InventoryUpdateHistory {
+  id          Int       @id @default(autoincrement())
+  inventoryId Int
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  updatedBy   String
+  user        User      @relation(fields: [updatedBy], references: [id])
+  changes     Json // 변경된 필드와 값을 JSON 형태로 저장
+  updatedAt   DateTime  @default(now())
+
+  @@index([inventoryId])
+  @@index([updatedBy])
 }
 
 // Enum reference model for type safety

@@ -1,11 +1,12 @@
 import { $Enums } from '@prisma/client';
 // hooks/useInventoryState.ts
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   InventoryItem,
   UploadSupplyItem,
   UploadFoodItem,
 } from '@/types/inventory';
+import { getInventoryByType } from '@/utils/api';
 
 export function useInventoryState() {
   const [selectedTab, setSelectedTab] =
@@ -15,21 +16,21 @@ export function useInventoryState() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTabChange = async (tab: $Enums.InventoryType) => {
-    setSelectedTab(tab);
-    setSelectedLocation('전체');
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`/api/inventory?type=${tab.toUpperCase()}`);
-      const data = await response.json();
-      setItems(data);
-    } catch (error) {
-      console.error('Error fetching inventory:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetchInventory = async () => {
+      setIsLoading(true);
+      setSelectedLocation('전체');
+      try {
+        const data = await getInventoryByType(selectedTab);
+        setItems(data);
+      } catch (error) {
+        console.error('Error fetching inventory:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchInventory();
+  }, [selectedTab]);
 
   const handleUpload = async (data: UploadSupplyItem | UploadFoodItem) => {
     setIsLoading(true);
@@ -67,7 +68,7 @@ export function useInventoryState() {
     setItems,
     setSelectedLocation,
     setSearchQuery,
-    handleTabChange,
     handleUpload,
+    setSelectedTab,
   };
 }
