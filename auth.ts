@@ -69,10 +69,14 @@ export const { handlers, signIn, auth } = NextAuth({
       },
     }),
   ],
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: 'jwt',
+  },
   callbacks: {
     async signIn({ account, profile, user }) {
       if (account?.provider === 'kakao' && profile && user.id) {
-        const id = user.id;
+        const id = String(profile?.id);
         try {
           await prisma.user.upsert({
             where: { id },
@@ -95,11 +99,11 @@ export const { handlers, signIn, auth } = NextAuth({
       }
       return false;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       try {
-        if (token.kakao_account && !token.role) {
+        if (account?.providerAccountId) {
           const response = await fetch(
-            `${process.env.AUTH_URL}/api/user?id=${token.id}`
+            `${process.env.AUTH_URL}/api/user?id=${account?.providerAccountId}`
           );
 
           if (!response.ok) {
@@ -108,6 +112,7 @@ export const { handlers, signIn, auth } = NextAuth({
 
           const userData = await response.json();
           token.role = userData.role; // token에 role 저장
+          token.sub = String(account?.providerAccountId);
         }
       } catch (error) {
         console.error('Error in jwt callback:', error);
@@ -116,7 +121,8 @@ export const { handlers, signIn, auth } = NextAuth({
 
       return { ...token, ...user };
     },
-    async session({ session, token }) {
+    async session({ session, token, user }) {
+      console.log('session', token.sub);
       if (token.kakao_account) {
         const account = token.kakao_account as KakaoAccount;
         session.user.nickname = account.profile.nickname;
