@@ -21,6 +21,7 @@ export default function InventoryPage() {
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
+    if (items === undefined) return [];
     const locationFiltered = items.filter(
       (item) =>
         selectedLocation === '전체' || item.location === selectedLocation
@@ -48,7 +49,7 @@ export default function InventoryPage() {
       />
 
       <div className='flex-1 overflow-y-hidden p-4'>
-        {isLoading && items.length === 0 ? (
+        {isLoading && items === undefined ? (
           <InventoryListSkeleton />
         ) : (
           <InventoryList items={filteredAndSearchedItems} />

@@ -13,7 +13,7 @@ export function useInventoryState() {
     useState<$Enums.InventoryType>('SUPPLY');
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
-  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [items, setItems] = useState<InventoryItem[]>();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
