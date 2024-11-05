@@ -121,8 +121,7 @@ export const { handlers, signIn, auth } = NextAuth({
 
       return { ...token, ...user };
     },
-    async session({ session, token, user }) {
-      console.log('session', token.sub);
+    async session({ session, token }) {
       if (token.kakao_account) {
         const account = token.kakao_account as KakaoAccount;
         session.user.nickname = account.profile.nickname;

@@ -9,11 +9,9 @@ import {
   UploadSupplyItem,
 } from '@/types/inventory';
 import InventoryUploadModal from '@/components/Modal/InventoryModal';
-import { useSession } from 'next-auth/react';
 import InventorySearch from './InventorySearch';
 import InventoryTab from './InventoryTab';
 import { FoodLocation, SupplyLocation } from '@prisma/client';
-import InventoryLoading from './InventoryLoading';
 
 type InventoryHeaderProps = {
   selectedTab: InventoryType;

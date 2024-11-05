@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -50,7 +50,7 @@ type CommonFields = Pick<
 
 type FormState = Record<InventoryType, UploadSupplyItem | UploadFoodItem>;
 
-const getCommonFields = (createdBy: string): CommonFields => ({
+const getInitialCommonFields = (createdBy: string): CommonFields => ({
   name: '',
   quantity: 0,
   status: 'SUFFICIENT' as const,
@@ -105,18 +105,27 @@ export default function InventoryUploadModal({
   onSubmit,
 }: InventoryUploadModalProps) {
   const session = useSession();
-  const updatedBy = session.data?.user.id;
 
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTab, setSelectedTab] =
     useState<$Enums.InventoryType>('SUPPLY');
   const [commonFields, setCommonFields] = useState<CommonFields>(
-    getCommonFields(updatedBy || '')
+    getInitialCommonFields('')
   );
   const [typeSpecificFields, setTypeSpecificFields] = useState(
     getTypeSpecificFields(selectedTab)
   );
+
+  useEffect(() => {
+    if (session.data?.user.id) {
+      setCommonFields({
+        ...commonFields,
+        createdBy: session.data.user.id,
+        updatedBy: session.data.user.id,
+      });
+    }
+  }, [session.data?.user.id, commonFields]);
 
   const formData = {
     ...commonFields,
@@ -143,9 +152,9 @@ export default function InventoryUploadModal({
 
   const resetForm = useCallback(() => {
     setSelectedTab('SUPPLY');
-    setCommonFields(getCommonFields(updatedBy || ''));
+    setCommonFields(getInitialCommonFields(session.data?.user.id || ''));
     setTypeSpecificFields(getTypeSpecificFields('SUPPLY'));
-  }, [updatedBy]);
+  }, [session.data?.user.id]);
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {

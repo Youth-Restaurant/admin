@@ -1,5 +1,5 @@
-import { $Enums } from '@prisma/client';
 // app/api/inventory/route.ts
+import { $Enums } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -27,7 +27,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log('data', data);
     const item = await prisma.inventory.create({
       data: {
         ...data,

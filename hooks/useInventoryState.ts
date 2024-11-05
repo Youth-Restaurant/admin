@@ -14,7 +14,7 @@ export function useInventoryState() {
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -33,7 +33,6 @@ export function useInventoryState() {
   }, [selectedTab]);
 
   const handleUpload = async (data: UploadSupplyItem | UploadFoodItem) => {
-    setIsLoading(true);
     try {
       const response = await fetch('/api/inventory', {
         method: 'POST',

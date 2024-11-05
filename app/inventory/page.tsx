@@ -1,11 +1,11 @@
 // /app/inventory/page.tsx
 'use client';
-import { useMemo, Suspense } from 'react';
+import { useMemo } from 'react';
 import { matchKoreanText } from '@/utils/search';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryList from '@/components/inventory/InventoryList';
-import Loading from '@/components/inventory/InventoryLoading';
 import { useInventoryState } from '@/hooks/useInventoryState';
+import InventoryListSkeleton from '@/components/inventory/InventoryListSkeleton';
 
 export default function InventoryPage() {
   const {
@@ -36,7 +36,6 @@ export default function InventoryPage() {
 
   return (
     <div className='flex flex-col h-full'>
-      {/* <Suspense fallback={<Loading />}> */}
       <InventoryHeader
         selectedTab={selectedTab}
         selectedLocation={selectedLocation}
@@ -47,10 +46,13 @@ export default function InventoryPage() {
         isLoading={isLoading}
         onUpload={handleUpload}
       />
-      {/* </Suspense> */}
 
-      <div className='flex-1 overflow-y-auto p-4'>
-        <InventoryList items={filteredAndSearchedItems} />
+      <div className='flex-1 overflow-y-hidden p-4'>
+        {isLoading && items.length === 0 ? (
+          <InventoryListSkeleton />
+        ) : (
+          <InventoryList items={filteredAndSearchedItems} />
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { Card, CardContent } from '../ui/card';
 import { Calendar } from 'lucide-react';
-import { formatDate } from '@/utils/date';
+import { formatDateTime } from '@/utils/date';
 import { Badge, BadgeVariant } from '../ui/badge';
 import Link from 'next/link';
 import { $Enums, Notice } from '@prisma/client';
@@ -63,7 +63,7 @@ const NoticePreview = ({ notice }: Props) => {
               {/* Date */}
               <div className='flex items-center text-gray-500 text-sm'>
                 <Calendar className='w-4 h-4 mr-1' />
-                <span>{formatDate(createdAt)}</span>
+                <span>{formatDateTime(createdAt)}</span>
               </div>
             </div>
           </div>

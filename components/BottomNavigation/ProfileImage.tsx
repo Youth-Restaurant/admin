@@ -6,8 +6,6 @@ import Link from 'next/link';
 export default async function ProfileImage() {
   const session = await auth();
 
-  console.log('session', session);
-
   return (
     <li>
       <Link href='/my'>

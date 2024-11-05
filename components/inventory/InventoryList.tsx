@@ -8,7 +8,6 @@ type InventoryListProps = {
 };
 
 export default function InventoryList({ items }: InventoryListProps) {
-  console.log(items);
   if (items.length === 0) {
     return (
       <div className='text-center py-8 text-gray-500'>재고 항목이 없습니다</div>
