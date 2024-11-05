@@ -1,3 +1,4 @@
+// /components/Header.tsx
 export default function Header() {
   return (
     <header className='flex px-3 items-center border-b-[1px] h-[var(--header-height)]'>

@@ -1,3 +1,4 @@
+// /components/BottomNavigation/Navigation.tsx
 'use client';
 import { BellIcon, BoxIcon, Calendar, File } from 'lucide-react';
 import Link from 'next/link';

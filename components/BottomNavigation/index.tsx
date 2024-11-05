@@ -1,3 +1,4 @@
+// /components/BottomNavigation/index.tsx
 import Navigation from './Navigation';
 import ProfileImage from './ProfileImage';
 
