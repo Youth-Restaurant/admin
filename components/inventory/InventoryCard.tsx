@@ -6,6 +6,7 @@ import {
   filterLocationEnumForDisplay,
   InventoryItem,
 } from '@/types/inventory';
+import { formatDateTime } from '@/utils/date';
 
 type InventoryCardProps = {
   item: InventoryItem;
@@ -27,8 +28,7 @@ export default function InventoryCard({ item }: InventoryCardProps) {
               <p>위치: {filterLocationEnumForDisplay(item.location)}</p>
               <p>수량: {item.quantity}</p>
               <p className='text-xs'>
-                최종 수정: {new Date(item.lastUpdated).toLocaleDateString()} by{' '}
-                {item.createdBy}
+                최근 수정: {formatDateTime(item.lastUpdated)}
               </p>
             </div>
           </div>
