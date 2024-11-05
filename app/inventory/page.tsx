@@ -36,18 +36,18 @@ export default function InventoryPage() {
 
   return (
     <div className='flex flex-col h-full'>
-      <Suspense fallback={<Loading />}>
-        <InventoryHeader
-          selectedTab={selectedTab}
-          selectedLocation={selectedLocation}
-          searchQuery={searchQuery}
-          onTabChange={setSelectedTab}
-          onLocationChange={setSelectedLocation}
-          onSearchChange={setSearchQuery}
-          isLoading={isLoading}
-          onUpload={handleUpload}
-        />
-      </Suspense>
+      {/* <Suspense fallback={<Loading />}> */}
+      <InventoryHeader
+        selectedTab={selectedTab}
+        selectedLocation={selectedLocation}
+        searchQuery={searchQuery}
+        onTabChange={setSelectedTab}
+        onLocationChange={setSelectedLocation}
+        onSearchChange={setSearchQuery}
+        isLoading={isLoading}
+        onUpload={handleUpload}
+      />
+      {/* </Suspense> */}
 
       <div className='flex-1 overflow-y-auto p-4'>
         <InventoryList items={filteredAndSearchedItems} />

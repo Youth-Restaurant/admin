@@ -13,6 +13,7 @@ import { useSession } from 'next-auth/react';
 import InventorySearch from './InventorySearch';
 import InventoryTab from './InventoryTab';
 import { FoodLocation, SupplyLocation } from '@prisma/client';
+import InventoryLoading from './InventoryLoading';
 
 type InventoryHeaderProps = {
   selectedTab: InventoryType;
@@ -35,11 +36,6 @@ export default function InventoryHeader({
   isLoading = false,
   onUpload,
 }: InventoryHeaderProps) {
-  const session = useSession();
-  const id = session.data?.user.id;
-
-  if (id === undefined) return null;
-
   return (
     <div className='sticky top-0 bg-white p-4 z-10 border-b'>
       <div className='flex gap-2 mb-4'>
@@ -48,11 +44,7 @@ export default function InventoryHeader({
           onChange={onSearchChange}
           disabled={isLoading}
         />
-        <InventoryUploadModal
-          isLoading={isLoading}
-          onSubmit={onUpload}
-          updatedBy={id}
-        />
+        <InventoryUploadModal isLoading={isLoading} onSubmit={onUpload} />
       </div>
 
       <InventoryTab

@@ -30,11 +30,11 @@ import ImageUploader from '@/components/ImageUploader';
 import InventoryTab from '@/components/inventory/InventoryTab';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
 import { $Enums, SupplyLocation, FoodLocation } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 
 type InventoryUploadModalProps = {
   isLoading?: boolean;
   onSubmit: (data: UploadSupplyItem | UploadFoodItem) => Promise<void>;
-  updatedBy: string;
 };
 
 type CommonFields = Pick<
@@ -55,7 +55,7 @@ const getCommonFields = (createdBy: string): CommonFields => ({
   quantity: 0,
   status: 'SUFFICIENT' as const,
   createdBy,
-  updatedBy: createdBy,
+  updatedBy: createdBy || '',
   memo: '',
   imageUrl: '',
 });
@@ -103,14 +103,16 @@ const isValidName = (name: string): boolean => {
 export default function InventoryUploadModal({
   isLoading = false,
   onSubmit,
-  updatedBy,
 }: InventoryUploadModalProps) {
+  const session = useSession();
+  const updatedBy = session.data?.user.id;
+
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTab, setSelectedTab] =
     useState<$Enums.InventoryType>('SUPPLY');
   const [commonFields, setCommonFields] = useState<CommonFields>(
-    getCommonFields(updatedBy)
+    getCommonFields(updatedBy || '')
   );
   const [typeSpecificFields, setTypeSpecificFields] = useState(
     getTypeSpecificFields(selectedTab)
@@ -141,7 +143,7 @@ export default function InventoryUploadModal({
 
   const resetForm = useCallback(() => {
     setSelectedTab('SUPPLY');
-    setCommonFields(getCommonFields(updatedBy));
+    setCommonFields(getCommonFields(updatedBy || ''));
     setTypeSpecificFields(getTypeSpecificFields('SUPPLY'));
   }, [updatedBy]);
 
