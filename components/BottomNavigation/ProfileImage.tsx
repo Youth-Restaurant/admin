@@ -1,9 +1,12 @@
+// /components/BottomNavigation/ProfileImage.tsx
 import { auth } from '@/auth';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function ProfileImage() {
   const session = await auth();
+
+  console.log('session', session);
 
   return (
     <li>
@@ -15,6 +18,7 @@ export default async function ProfileImage() {
             width={100}
             height={100}
             draggable={false}
+            priority // lazy loading 비활성화
           />
         </div>
       </Link>
