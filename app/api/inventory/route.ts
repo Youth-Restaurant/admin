@@ -34,8 +34,6 @@ export async function GET(request: Request) {
       prisma.inventory.count({ where }),
     ]);
 
-    console.log(items.length, total);
-
     return NextResponse.json({
       items,
       currentPage: page,

@@ -74,7 +74,7 @@ const getTypeSpecificFields = (type: InventoryType) => {
       type: 'FOOD' as const,
       location: '' as FoodLocation,
       category: '' as FoodCategoryType,
-      expirationDate: '',
+      expirationDate: undefined,
     };
   }
 };
