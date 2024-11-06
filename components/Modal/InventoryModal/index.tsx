@@ -118,14 +118,15 @@ export default function InventoryUploadModal({
   );
 
   useEffect(() => {
-    if (session.data?.user.id) {
-      setCommonFields({
-        ...commonFields,
-        createdBy: session.data.user.id,
-        updatedBy: session.data.user.id,
-      });
+    const id = session.data?.user.id;
+    if (id) {
+      setCommonFields((prev) => ({
+        ...prev,
+        createdBy: id,
+        updatedBy: id,
+      }));
     }
-  }, [session.data?.user.id, commonFields]);
+  }, [session.data?.user.id]);
 
   const formData = {
     ...commonFields,
