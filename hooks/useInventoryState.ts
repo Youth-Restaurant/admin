@@ -9,34 +9,28 @@ export function useInventoryState() {
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isLoading,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: ['inventory', selectedTab, selectedLocation, searchQuery],
-    queryFn: async ({ pageParam = 1 }) => {
-      const params = new URLSearchParams({
-        page: String(pageParam),
-        limit: '10',
-        type: selectedTab,
-        location: selectedLocation,
-        search: searchQuery,
-      });
+  const { data, fetchNextPage, hasNextPage, isLoading, refetch } =
+    useInfiniteQuery({
+      queryKey: ['inventory', selectedTab, selectedLocation, searchQuery],
+      queryFn: async ({ pageParam = 1 }) => {
+        const params = new URLSearchParams({
+          page: String(pageParam),
+          limit: '10',
+          type: selectedTab,
+          location: selectedLocation,
+          search: searchQuery,
+        });
 
-      const response = await fetch(`/api/inventory?${params}`);
-      const data = await response.json();
-      return data;
-    },
-    getNextPageParam: (lastPage) => {
-      if (lastPage.items.length < 10) return undefined;
-      return lastPage.currentPage + 1;
-    },
-    initialPageParam: 1,
-  });
+        const response = await fetch(`/api/inventory?${params}`);
+        const data = await response.json();
+        return data;
+      },
+      getNextPageParam: (lastPage) => {
+        if (lastPage.items.length < 10) return undefined;
+        return lastPage.currentPage + 1;
+      },
+      initialPageParam: 1,
+    });
 
   const handleUpload = async (data: UploadSupplyItem | UploadFoodItem) => {
     try {
@@ -61,20 +55,18 @@ export function useInventoryState() {
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
-  console.log(items);
-
   return {
     selectedTab,
     selectedLocation,
     searchQuery,
     items,
     isLoading,
-    isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
     setSelectedLocation,
     setSearchQuery,
     handleUpload,
     setSelectedTab,
+    refetch,
   };
 }

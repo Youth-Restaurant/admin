@@ -16,7 +16,7 @@ const Skeleton = ({
 
 export default function InventoryListSkeleton() {
   return (
-    <div className='space-y-3'>
+    <div className='space-y-3 mt-4'>
       {[...Array(5)].map((_, index) => (
         <Card key={index} className='shadow-none'>
           <CardContent className='p-4'>

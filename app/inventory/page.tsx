@@ -20,6 +20,7 @@ export default function InventoryPage() {
     setSelectedTab,
     fetchNextPage,
     hasNextPage,
+    refetch,
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
@@ -59,6 +60,7 @@ export default function InventoryPage() {
             isLoading={isLoading}
             fetchNextPage={fetchNextPage}
             hasNextPage={hasNextPage}
+            onRefresh={refetch}
           />
         )}
       </div>
