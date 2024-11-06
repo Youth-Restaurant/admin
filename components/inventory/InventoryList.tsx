@@ -1,18 +1,16 @@
-// components/inventory/InventoryList.tsx
+// app/components/inventory/InventoryList.tsx
 'use client';
 import { useInView } from 'react-intersection-observer';
 import { useEffect } from 'react';
 import { InventoryItem } from '@/types/inventory';
 import InventoryCard from './InventoryCard';
 import InventoryListSkeleton from './InventoryListSkeleton';
-import PullToRefresh from '../common/PullToRefresh';
 
 type InventoryListProps = {
   items: InventoryItem[];
   isLoading: boolean;
   hasNextPage?: boolean;
   fetchNextPage: () => void;
-  onRefresh?: () => void;
 };
 
 export default function InventoryList({
@@ -20,11 +18,10 @@ export default function InventoryList({
   isLoading,
   hasNextPage,
   fetchNextPage,
-  onRefresh,
 }: InventoryListProps) {
   const { ref, inView } = useInView({
-    threshold: 0.1,
-    rootMargin: '100px',
+    threshold: 0.1, // 요소가 10% 이상 보일 때 감지
+    rootMargin: '100px', // 요소가 뷰포트 하단 100px 전에 감지
   });
 
   useEffect(() => {
@@ -33,7 +30,7 @@ export default function InventoryList({
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  if (isLoading && items.length === 0) return <InventoryListSkeleton />;
+  if (isLoading) return <InventoryListSkeleton />;
 
   if (items.length === 0) {
     return (
@@ -41,8 +38,8 @@ export default function InventoryList({
     );
   }
 
-  const content = (
-    <div className='space-y-3'>
+  return (
+    <div className='mt-4 overflow-y-auto scrollbar-hide space-y-3'>
       {items.map((item) => (
         <InventoryCard key={item.id} item={item} />
       ))}
@@ -54,18 +51,5 @@ export default function InventoryList({
         )}
       </div>
     </div>
-  );
-
-  if (!onRefresh) {
-    return <div className='mt-4 overflow-y-auto scrollbar-hide'>{content}</div>;
-  }
-
-  return (
-    <PullToRefresh
-      onRefresh={onRefresh}
-      className='mt-4 overflow-y-auto scrollbar-hide'
-    >
-      {content}
-    </PullToRefresh>
   );
 }

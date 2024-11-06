@@ -67,6 +67,5 @@ export function useInventoryState() {
     setSearchQuery,
     handleUpload,
     setSelectedTab,
-    refetch,
   };
 }
