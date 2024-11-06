@@ -39,9 +39,6 @@ export default function InventoryCard({ item }: InventoryCardProps) {
                 </div>
               )}
             </div>
-            {!item.imageUrl && (
-              <span className='text-gray-500 text-sm mt-1'>미등록</span>
-            )}
           </div>
           <div className='flex-1'>
             <div className='flex items-center gap-2 mb-1'>
