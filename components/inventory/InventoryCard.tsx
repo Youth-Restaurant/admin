@@ -8,27 +8,35 @@ import {
 } from '@/types/inventory';
 import { formatDateTime } from '@/utils/date';
 import Image from 'next/image';
+import { useState } from 'react';
 
 type InventoryCardProps = {
   item: InventoryItem;
 };
 
 export default function InventoryCard({ item }: InventoryCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Card className='shadow-none'>
       <CardContent className='p-4'>
         <div className='flex justify-between items-start gap-4'>
           <div className='w-20 flex flex-col items-center flex-shrink-0'>
             <div className='w-20 h-20 relative'>
-              {item.imageUrl ? (
+              {item.imageUrl && !imageError ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
                   fill
                   className='object-cover rounded'
+                  onError={() => setImageError(true)}
                 />
               ) : (
-                <div className='w-full h-full bg-gray-100 rounded' />
+                <div className='w-full h-full bg-gray-100 rounded flex items-center justify-center p-2'>
+                  <span className='text-gray-500 text-sm text-center'>
+                    {item.imageUrl ? '존재하지 않는 이미지' : '미등록'}
+                  </span>
+                </div>
               )}
             </div>
             {!item.imageUrl && (
