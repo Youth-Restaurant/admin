@@ -18,6 +18,8 @@ export default function InventoryPage() {
     setSearchQuery,
     handleUpload,
     setSelectedTab,
+    fetchNextPage,
+    hasNextPage,
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
@@ -36,7 +38,7 @@ export default function InventoryPage() {
   }, [items, selectedLocation, searchQuery]);
 
   return (
-    <div className='flex flex-col h-full'>
+    <div className='flex flex-col min-h-full'>
       <InventoryHeader
         selectedTab={selectedTab}
         selectedLocation={selectedLocation}
@@ -52,7 +54,12 @@ export default function InventoryPage() {
         {isLoading && items === undefined ? (
           <InventoryListSkeleton />
         ) : (
-          <InventoryList items={filteredAndSearchedItems} />
+          <InventoryList
+            items={filteredAndSearchedItems}
+            isLoading={isLoading}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+          />
         )}
       </div>
     </div>

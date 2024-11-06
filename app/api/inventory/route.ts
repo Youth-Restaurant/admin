@@ -6,15 +6,42 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const type = (searchParams.get('type') || 'SUPPLY') as $Enums.InventoryType;
+  const location = searchParams.get('location');
+  const search = searchParams.get('search') || '';
+  const page = Number(searchParams.get('page')) || 1;
+  const limit = Number(searchParams.get('limit')) || 10;
+  const skip = (page - 1) * limit;
 
   try {
-    const items = await prisma.inventory.findMany({
-      where: { type: type },
-      include: { user: true },
-      orderBy: { updatedAt: 'desc' },
-    });
+    const where = {
+      type,
+      ...(location && location !== '전체' && { location }),
+      ...(search && {
+        OR: [
+          { name: { contains: search } },
+          { category: { contains: search } },
+        ],
+      }),
+    };
 
-    return NextResponse.json(items);
+    const [items, total] = await Promise.all([
+      prisma.inventory.findMany({
+        where,
+        orderBy: { updatedAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      prisma.inventory.count({ where }),
+    ]);
+
+    console.log(items.length, total);
+
+    return NextResponse.json({
+      items,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      hasMore: skip + items.length < total,
+    });
   } catch (error) {
     console.error('Failed to fetch inventory items:', error);
     return NextResponse.json(
@@ -30,7 +57,7 @@ export async function POST(request: Request) {
     const item = await prisma.inventory.create({
       data: {
         ...data,
-        lastUpdated: new Date(),
+        updatedAt: new Date(),
       },
     });
 

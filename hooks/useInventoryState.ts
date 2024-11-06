@@ -1,36 +1,42 @@
 import { $Enums } from '@prisma/client';
-// hooks/useInventoryState.ts
-import { useEffect, useState } from 'react';
-import {
-  InventoryItem,
-  UploadSupplyItem,
-  UploadFoodItem,
-} from '@/types/inventory';
-import { getInventoryByType } from '@/utils/api';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { UploadSupplyItem, UploadFoodItem } from '@/types/inventory';
 
 export function useInventoryState() {
   const [selectedTab, setSelectedTab] =
     useState<$Enums.InventoryType>('SUPPLY');
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
-  const [items, setItems] = useState<InventoryItem[]>();
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchInventory = async () => {
-      setIsLoading(true);
-      setSelectedLocation('전체');
-      try {
-        const data = await getInventoryByType(selectedTab);
-        setItems(data);
-      } catch (error) {
-        console.error('Error fetching inventory:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInventory();
-  }, [selectedTab]);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['inventory', selectedTab, selectedLocation, searchQuery],
+    queryFn: async ({ pageParam = 1 }) => {
+      const params = new URLSearchParams({
+        page: String(pageParam),
+        limit: '10',
+        type: selectedTab,
+        location: selectedLocation,
+        search: searchQuery,
+      });
+
+      const response = await fetch(`/api/inventory?${params}`);
+      const data = await response.json();
+      return data;
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.items.length < 10) return undefined;
+      return lastPage.currentPage + 1;
+    },
+    initialPageParam: 1,
+  });
 
   const handleUpload = async (data: UploadSupplyItem | UploadFoodItem) => {
     try {
@@ -46,17 +52,16 @@ export function useInventoryState() {
         throw new Error('Failed to upload inventory');
       }
 
-      const updatedData = await fetch(
-        `/api/inventory?type=${selectedTab.toUpperCase()}`
-      );
-      const items = await updatedData.json();
-      setItems(items);
+      // 데이터가 추가된 후 쿼리를 다시 실행
+      refetch();
     } catch (error) {
       console.error('Error uploading inventory:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
+
+  const items = data?.pages.flatMap((page) => page.items) ?? [];
+
+  console.log(items);
 
   return {
     selectedTab,
@@ -64,7 +69,9 @@ export function useInventoryState() {
     searchQuery,
     items,
     isLoading,
-    setItems,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     setSelectedLocation,
     setSearchQuery,
     handleUpload,

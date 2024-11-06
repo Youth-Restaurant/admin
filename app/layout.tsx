@@ -7,6 +7,7 @@ import { auth } from '@/auth';
 import BottomNavigation from '@/components/BottomNavigation';
 import { SessionProvider } from 'next-auth/react';
 import { Toaster } from '@/components/ui/toaster';
+import Providers from './providers';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -48,12 +49,14 @@ export default async function RootLayout({
         <div className='min-w-[340px] max-w-[500px] m-auto bg-white min-h-screen relative'>
           {session?.user.nickname ? (
             <SessionProvider>
-              <Header />
-              <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto hide-scrollbar'>
-                {children}
-                <Toaster />
-              </main>
-              <BottomNavigation />
+              <Providers>
+                <Header />
+                <main className='px-[10px] h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] overflow-y-auto hide-scrollbar'>
+                  {children}
+                  <Toaster />
+                </main>
+                <BottomNavigation />
+              </Providers>
             </SessionProvider>
           ) : (
             children
