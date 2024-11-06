@@ -48,7 +48,7 @@ export default function InventoryPage() {
         onUpload={handleUpload}
       />
 
-      <div className='flex-1 overflow-y-hidden p-4'>
+      <div className='flex-1 px-4'>
         {isLoading && items === undefined ? (
           <InventoryListSkeleton />
         ) : (

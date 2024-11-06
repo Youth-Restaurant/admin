@@ -15,7 +15,7 @@ export default function InventoryList({ items }: InventoryListProps) {
   }
 
   return (
-    <div className='space-y-3'>
+    <div className='my-4 overflow-y-auto scrollbar-hide max-h-full space-y-3'>
       {items.map((item) => (
         <InventoryCard key={item.id} item={item} />
       ))}
