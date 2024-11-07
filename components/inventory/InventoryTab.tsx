@@ -5,22 +5,33 @@ import { $Enums } from '@prisma/client';
 
 type InventoryTabProps = {
   isLoading: boolean;
-  selectedTab: $Enums.InventoryType;
-  onTabChange(value: $Enums.InventoryType): void;
+  selectedTab: $Enums.InventoryType | 'ALL';
+  onTabChange(value: $Enums.InventoryType | 'ALL'): void;
+  showAllTab?: boolean;
 };
 
 export default function InventoryTab({
   isLoading,
   selectedTab,
   onTabChange,
+  showAllTab = true,
 }: InventoryTabProps) {
   return (
     <Tabs
       value={selectedTab}
       className='mb-4'
-      onValueChange={(value) => onTabChange(value as $Enums.InventoryType)}
+      onValueChange={(value) =>
+        onTabChange(value as $Enums.InventoryType | 'ALL')
+      }
     >
-      <TabsList className='grid w-full grid-cols-2'>
+      <TabsList
+        className={`grid w-full ${showAllTab ? 'grid-cols-3' : 'grid-cols-2'}`}
+      >
+        {showAllTab && (
+          <TabsTrigger value='ALL' disabled={isLoading}>
+            전체
+          </TabsTrigger>
+        )}
         <TabsTrigger value='SUPPLY' disabled={isLoading}>
           {convertEnumToDisplay('type', 'SUPPLY')}
         </TabsTrigger>

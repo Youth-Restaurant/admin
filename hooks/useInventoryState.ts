@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { UploadSupplyItem, UploadFoodItem } from '@/types/inventory';
 
 export function useInventoryState() {
-  const [selectedTab, setSelectedTab] =
-    useState<$Enums.InventoryType>('SUPPLY');
+  const [selectedTab, setSelectedTab] = useState<$Enums.InventoryType | 'ALL'>(
+    'ALL'
+  );
   const [selectedLocation, setSelectedLocation] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -16,7 +17,7 @@ export function useInventoryState() {
         const params = new URLSearchParams({
           page: String(pageParam),
           limit: '10',
-          type: selectedTab,
+          ...(selectedTab !== 'ALL' && { type: selectedTab }),
           location: selectedLocation,
           search: searchQuery,
         });

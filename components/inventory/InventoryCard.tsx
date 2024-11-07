@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   convertEnumToDisplay,
-  filterLocationEnumForDisplay,
+  getLocationDisplay,
   InventoryItem,
 } from '@/types/inventory';
 import { formatDateTime } from '@/utils/date';
@@ -55,7 +55,7 @@ export default function InventoryCard({ item }: InventoryCardProps) {
               </Badge>
             </div>
             <div className='text-sm text-gray-500 space-y-1'>
-              <p>위치: {filterLocationEnumForDisplay(item.location)}</p>
+              <p>위치: {getLocationDisplay(item.type, item.location)}</p>
               <p>수량: {renderQuantity(item.quantity)}</p>
               <p className='text-xs'>
                 최근 수정: {formatDateTime(item.lastUpdated)}

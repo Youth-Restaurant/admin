@@ -2,7 +2,7 @@
 'use client';
 import { Badge } from '@/components/ui/badge';
 import {
-  convertEnumToDisplay,
+  getLocationDisplay,
   InventoryType,
   LOCATIONS,
   UploadFoodItem,
@@ -11,13 +11,12 @@ import {
 import InventoryUploadModal from '@/components/Modal/InventoryModal';
 import InventorySearch from './InventorySearch';
 import InventoryTab from './InventoryTab';
-import { FoodLocation, SupplyLocation } from '@prisma/client';
 
 type InventoryHeaderProps = {
-  selectedTab: InventoryType;
+  selectedTab: InventoryType | 'ALL';
   selectedLocation: string;
   searchQuery: string;
-  onTabChange: (tab: InventoryType) => void;
+  onTabChange: (tab: InventoryType | 'ALL') => void;
   onLocationChange: (location: string) => void;
   onSearchChange: (query: string) => void;
   isLoading?: boolean;
@@ -34,6 +33,11 @@ export default function InventoryHeader({
   isLoading = false,
   onUpload,
 }: InventoryHeaderProps) {
+  const handleTabChange = (value: InventoryType | 'ALL') => {
+    onTabChange(value);
+    onLocationChange('전체');
+  };
+
   return (
     <div className='sticky top-0 bg-white p-4 z-10 border-b'>
       <div className='flex gap-2 mb-4'>
@@ -44,7 +48,8 @@ export default function InventoryHeader({
       <InventoryTab
         isLoading={isLoading}
         selectedTab={selectedTab}
-        onTabChange={(value) => onTabChange(value)}
+        onTabChange={handleTabChange}
+        showAllTab={true}
       />
 
       <div className='flex gap-2 overflow-x-auto hide-scrollbar'>
@@ -57,7 +62,7 @@ export default function InventoryHeader({
         >
           전체
         </Badge>
-        {LOCATIONS[selectedTab].map((location) => (
+        {Array.from(LOCATIONS[selectedTab]).map((location) => (
           <Badge
             key={location}
             variant={selectedLocation === location ? 'default' : 'outline'}
@@ -66,13 +71,7 @@ export default function InventoryHeader({
             }`}
             onClick={() => onLocationChange(location)}
           >
-            {selectedTab === 'SUPPLY' &&
-              convertEnumToDisplay(
-                'supplyLocation',
-                location as SupplyLocation
-              )}
-            {selectedTab === 'FOOD' &&
-              convertEnumToDisplay('foodLocation', location as FoodLocation)}
+            {getLocationDisplay(selectedTab, location)}
           </Badge>
         ))}
       </div>

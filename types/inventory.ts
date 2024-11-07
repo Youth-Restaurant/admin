@@ -106,12 +106,13 @@ export type InventoryItem = SupplyItem | FoodItem;
 export const SUPPLY_CATEGORIES = Object.values(SUPPLY_CATEGORY);
 export const FOOD_CATEGORIES = Object.values(FOOD_CATEGORY);
 
-export const LOCATIONS: Record<
-  $Enums.InventoryType,
-  $Enums.SupplyLocation[] | $Enums.FoodLocation[]
-> = {
-  SUPPLY: Object.values($Enums.SupplyLocation),
-  FOOD: Object.values($Enums.FoodLocation),
+export const LOCATIONS = {
+  ALL: new Set([
+    ...Object.values(SupplyLocation),
+    ...Object.values(FoodLocation),
+  ]),
+  SUPPLY: new Set(Object.values(SupplyLocation)),
+  FOOD: new Set(Object.values(FoodLocation)),
 } as const;
 
 /**
@@ -171,12 +172,23 @@ export const isValidEnumValue = <T extends EnumType>(
   return typeof value === 'string' && value in ENUM_MAPPINGS[type];
 };
 
-export const filterLocationEnumForDisplay = (
-  value: SupplyLocation | FoodLocation
+export const getLocationDisplay = (
+  tab: InventoryType | 'ALL',
+  location: string
 ): string => {
-  if (value in SupplyLocation)
-    return convertEnumToDisplay('supplyLocation', value as SupplyLocation);
-  if (value in FoodLocation)
-    return convertEnumToDisplay('foodLocation', value as FoodLocation);
-  return '미등록 위치';
+  if (tab === 'ALL') {
+    if (location in SupplyLocation) {
+      return convertEnumToDisplay('supplyLocation', location as SupplyLocation);
+    }
+    if (location in FoodLocation) {
+      return convertEnumToDisplay('foodLocation', location as FoodLocation);
+    }
+  }
+  if (tab === 'SUPPLY') {
+    return convertEnumToDisplay('supplyLocation', location as SupplyLocation);
+  }
+  if (tab === 'FOOD') {
+    return convertEnumToDisplay('foodLocation', location as FoodLocation);
+  }
+  return location;
 };

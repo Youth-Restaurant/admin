@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = (searchParams.get('type') || 'SUPPLY') as $Enums.InventoryType;
+  const type = searchParams.get('type') as $Enums.InventoryType | null;
   const location = searchParams.get('location');
   const search = searchParams.get('search') || '';
   const page = Number(searchParams.get('page')) || 1;
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
   try {
     const where = {
-      type,
+      ...(type && { type }),
       ...(location && location !== '전체' && { location }),
       ...(search && {
         OR: [

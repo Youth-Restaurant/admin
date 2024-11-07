@@ -270,6 +270,7 @@ export default function InventoryUploadModal({
             isLoading={isLoading}
             selectedTab={selectedTab}
             onTabChange={handleTabChange}
+            showAllTab={false}
           />
 
           <div className='pb-2'>
