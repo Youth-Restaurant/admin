@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { filterLocationEnumForDisplay, LOCATIONS } from '@/types/inventory';
+import { getLocationDisplay, LOCATIONS } from '@/types/inventory';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
 import { $Enums } from '@prisma/client';
 
@@ -40,9 +40,9 @@ export function LocationSelect({
           <SelectValue placeholder='위치를 선택하세요' />
         </SelectTrigger>
         <SelectContent>
-          {LOCATIONS[selectedTab].map((location) => (
+          {Array.from(LOCATIONS[selectedTab]).map((location) => (
             <SelectItem key={location} value={location}>
-              {filterLocationEnumForDisplay(location)}
+              {getLocationDisplay(selectedTab, location)}
             </SelectItem>
           ))}
         </SelectContent>
