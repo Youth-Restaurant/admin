@@ -7,6 +7,7 @@ import {
   LOCATIONS,
   UploadFoodItem,
   UploadSupplyItem,
+  InventoryItem,
 } from '@/types/inventory';
 import InventoryUploadModal from '@/components/Modal/InventoryModal';
 import InventorySearch from './InventorySearch';
@@ -21,6 +22,12 @@ type InventoryHeaderProps = {
   onSearchChange: (query: string) => void;
   isLoading?: boolean;
   onUpload: (data: UploadSupplyItem | UploadFoodItem) => Promise<void>;
+  counts: {
+    ALL: number;
+    SUPPLY: number;
+    FOOD: number;
+  };
+  items: InventoryItem[];
 };
 
 export default function InventoryHeader({
@@ -32,6 +39,8 @@ export default function InventoryHeader({
   onSearchChange,
   isLoading = false,
   onUpload,
+  counts,
+  items,
 }: InventoryHeaderProps) {
   const handleTabChange = (value: InventoryType | 'ALL') => {
     onTabChange(value);
@@ -50,6 +59,7 @@ export default function InventoryHeader({
         selectedTab={selectedTab}
         onTabChange={handleTabChange}
         showAllTab={true}
+        counts={counts}
       />
 
       <div className='flex gap-2 overflow-x-auto hide-scrollbar'>

@@ -20,6 +20,7 @@ export default function InventoryPage() {
     setSelectedTab,
     fetchNextPage,
     hasNextPage,
+    counts,
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
@@ -48,6 +49,8 @@ export default function InventoryPage() {
         onSearchChange={setSearchQuery}
         isLoading={isLoading}
         onUpload={handleUpload}
+        counts={counts}
+        items={items}
       />
 
       <div className='flex-1 px-4'>

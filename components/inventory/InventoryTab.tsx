@@ -1,5 +1,5 @@
 // /components/inventory/InventoryTab.tsx
-import { convertEnumToDisplay, InventoryType } from '@/types/inventory';
+import { convertEnumToDisplay } from '@/types/inventory';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { $Enums } from '@prisma/client';
 
@@ -8,6 +8,11 @@ type InventoryTabProps = {
   selectedTab: $Enums.InventoryType | 'ALL';
   onTabChange(value: $Enums.InventoryType | 'ALL'): void;
   showAllTab?: boolean;
+  counts?: {
+    ALL: number;
+    SUPPLY: number;
+    FOOD: number;
+  };
 };
 
 export default function InventoryTab({
@@ -15,6 +20,7 @@ export default function InventoryTab({
   selectedTab,
   onTabChange,
   showAllTab = true,
+  counts,
 }: InventoryTabProps) {
   return (
     <Tabs
@@ -29,14 +35,14 @@ export default function InventoryTab({
       >
         {showAllTab && (
           <TabsTrigger value='ALL' disabled={isLoading}>
-            전체
+            전체 ({counts?.ALL})
           </TabsTrigger>
         )}
         <TabsTrigger value='SUPPLY' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'SUPPLY')}
+          {convertEnumToDisplay('type', 'SUPPLY')} ({counts?.SUPPLY})
         </TabsTrigger>
         <TabsTrigger value='FOOD' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'FOOD')}
+          {convertEnumToDisplay('type', 'FOOD')} ({counts?.FOOD})
         </TabsTrigger>
       </TabsList>
     </Tabs>
