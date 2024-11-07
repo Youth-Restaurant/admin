@@ -29,6 +29,9 @@ body {
   :root {
     --header-height: 50px;
     --bottom-nav-height: 72px;
+    --inventory-header-height: 169px;
+    --inventory-card-height: 120px;
+    --inventory-card-gap: 10px;
 
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;

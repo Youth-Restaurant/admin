@@ -39,7 +39,7 @@ export default function InventoryHeader({
   };
 
   return (
-    <div className='sticky top-0 bg-white p-4 z-10 border-b'>
+    <div className='sticky top-0 bg-white z-10 border-b p-4 h-[var(--inventory-header-height)]'>
       <div className='flex gap-2 mb-4'>
         <InventorySearch value={searchQuery} onChange={onSearchChange} />
         <InventoryUploadModal isLoading={isLoading} onSubmit={onUpload} />

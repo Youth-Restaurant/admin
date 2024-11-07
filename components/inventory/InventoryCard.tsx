@@ -25,7 +25,7 @@ export default function InventoryCard({ item }: InventoryCardProps) {
   };
 
   return (
-    <Card className='shadow-none'>
+    <Card className='shadow-none h-[var(--inventory-card-height)]'>
       <CardContent className='p-4'>
         <div className='flex justify-between items-start gap-4'>
           <div className='w-20 flex flex-col items-center flex-shrink-0'>
