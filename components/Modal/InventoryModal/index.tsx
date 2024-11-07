@@ -52,7 +52,7 @@ type FormState = Record<InventoryType, UploadSupplyItem | UploadFoodItem>;
 
 const getInitialCommonFields = (createdBy: string): CommonFields => ({
   name: '',
-  quantity: 0,
+  quantity: undefined,
   status: 'SUFFICIENT' as const,
   createdBy,
   updatedBy: createdBy || '',
@@ -185,6 +185,15 @@ export default function InventoryUploadModal({
     e: React.ChangeEvent<HTMLInputElement> | { name: string; value: string }
   ) => {
     const { name, value } = 'target' in e ? e.target : e;
+
+    if (name === 'quantity') {
+      const numValue = value === undefined ? undefined : Number(value);
+      setCommonFields((prev) => ({
+        ...prev,
+        [name]: numValue,
+      }));
+      return;
+    }
 
     if (name in commonFields) {
       setCommonFields((prev) => ({

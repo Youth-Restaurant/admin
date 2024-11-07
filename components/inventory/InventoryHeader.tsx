@@ -37,11 +37,7 @@ export default function InventoryHeader({
   return (
     <div className='sticky top-0 bg-white p-4 z-10 border-b'>
       <div className='flex gap-2 mb-4'>
-        <InventorySearch
-          value={searchQuery}
-          onChange={onSearchChange}
-          disabled={isLoading}
-        />
+        <InventorySearch value={searchQuery} onChange={onSearchChange} />
         <InventoryUploadModal isLoading={isLoading} onSubmit={onUpload} />
       </div>
 

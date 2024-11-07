@@ -17,6 +17,13 @@ type InventoryCardProps = {
 export default function InventoryCard({ item }: InventoryCardProps) {
   const [imageError, setImageError] = useState(false);
 
+  const renderQuantity = (quantity: number | undefined) => {
+    if (quantity === -1) {
+      return <span className='text-red-500'>미입력</span>;
+    }
+    return quantity;
+  };
+
   return (
     <Card className='shadow-none'>
       <CardContent className='p-4'>
@@ -49,7 +56,7 @@ export default function InventoryCard({ item }: InventoryCardProps) {
             </div>
             <div className='text-sm text-gray-500 space-y-1'>
               <p>위치: {filterLocationEnumForDisplay(item.location)}</p>
-              <p>수량: {item.quantity}</p>
+              <p>수량: {renderQuantity(item.quantity)}</p>
               <p className='text-xs'>
                 최근 수정: {formatDateTime(item.lastUpdated)}
               </p>
