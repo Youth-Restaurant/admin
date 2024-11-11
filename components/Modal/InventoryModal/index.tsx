@@ -172,7 +172,17 @@ export default function InventoryUploadModal({
     setIsSubmitting(true);
 
     try {
-      await onSubmit(formData);
+      if (!session.data?.user.id) {
+        throw new Error('User session not found');
+      }
+
+      const submitData = {
+        ...formData,
+        createdBy: session.data.user.id,
+        updatedBy: session.data.user.id,
+      };
+
+      await onSubmit(submitData);
       handleOpenChange(false);
     } catch (error) {
       console.error('Failed to upload inventory:', error);

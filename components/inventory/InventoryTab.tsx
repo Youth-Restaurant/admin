@@ -35,14 +35,17 @@ export default function InventoryTab({
       >
         {showAllTab && (
           <TabsTrigger value='ALL' disabled={isLoading}>
-            전체 ({counts?.ALL})
+            전체
+            {counts?.ALL !== undefined && `(${counts?.ALL})`}
           </TabsTrigger>
         )}
         <TabsTrigger value='SUPPLY' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'SUPPLY')} ({counts?.SUPPLY})
+          {convertEnumToDisplay('type', 'SUPPLY')}
+          {counts?.SUPPLY !== undefined && `(${counts?.SUPPLY})`}
         </TabsTrigger>
         <TabsTrigger value='FOOD' disabled={isLoading}>
-          {convertEnumToDisplay('type', 'FOOD')} ({counts?.FOOD})
+          {convertEnumToDisplay('type', 'FOOD')}
+          {counts?.FOOD !== undefined && `(${counts?.FOOD})`}
         </TabsTrigger>
       </TabsList>
     </Tabs>

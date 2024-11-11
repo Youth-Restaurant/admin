@@ -7,9 +7,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { getLocationDisplay, LOCATIONS } from '@/types/inventory';
+import { getLocationDisplay } from '@/types/inventory';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
-import { $Enums } from '@prisma/client';
+import { $Enums, InventoryType } from '@prisma/client';
+import { useLocations } from '@/hooks/useLocations';
 
 type LocationSelectProps = {
   selectedTab: $Enums.InventoryType;
@@ -24,6 +25,16 @@ export function LocationSelect({
   onChange,
   required = false,
 }: LocationSelectProps) {
+  const { data: locations = [] } = useLocations();
+
+  // 선택된 탭에 해당하는 위치만 필터링하고 가나다순 정렬
+  const filteredLocations = locations
+    .filter(
+      (location: { type: InventoryType }) => location.type === selectedTab
+    )
+    .map((location: { name: string }) => location.name)
+    .sort((a: string, b: string) => a.localeCompare(b, 'ko'));
+
   return (
     <div className='space-y-2'>
       <Label htmlFor='location' className='flex items-center'>
@@ -40,9 +51,9 @@ export function LocationSelect({
           <SelectValue placeholder='위치를 선택하세요' />
         </SelectTrigger>
         <SelectContent>
-          {Array.from(LOCATIONS[selectedTab]).map((location) => (
-            <SelectItem key={location} value={location}>
-              {getLocationDisplay(selectedTab, location)}
+          {filteredLocations.map((locationName: string) => (
+            <SelectItem key={locationName} value={locationName}>
+              {locationName}
             </SelectItem>
           ))}
         </SelectContent>

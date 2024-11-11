@@ -68,6 +68,8 @@ model User {
   updatedAt              DateTime                 @updatedAt
   // email     String?
   InventoryUpdateHistory InventoryUpdateHistory[]
+
+  @@map("user")
 }
 
 model Notice {
@@ -81,6 +83,7 @@ model Notice {
   userId    String?
 
   @@index([createdAt])
+  @@map("notice")
 }
 
 model Inventory {
@@ -112,11 +115,16 @@ model Inventory {
   // Relation to update history
   updateHistory InventoryUpdateHistory[]
 
+  // 위치 모델 연결
+  locationId  Int?
+  locationRef InventoryLocation? @relation(fields: [locationId], references: [id])
+
   @@index([type])
   @@index([category])
   @@index([location])
   @@index([createdBy])
   @@index([status])
+  @@map("inventory")
 }
 
 model InventoryUpdateHistory {
@@ -130,6 +138,7 @@ model InventoryUpdateHistory {
 
   @@index([inventoryId])
   @@index([updatedBy])
+  @@map("inventory_update_history")
 }
 
 // Enum reference model for type safety
@@ -142,4 +151,18 @@ model EnumReference {
   createdAt      DateTime       @default(now())
 
   @@map("enum_reference")
+}
+
+// 위치 모델 수정
+model InventoryLocation {
+  id        Int           @id @default(autoincrement())
+  name      String // @unique 제거
+  type      InventoryType // SUPPLY 또는 FOOD
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  inventory Inventory[] // 관계 설정
+
+  // 이름과 타입의 조합이 유니크하도록 설정
+  @@unique([name, type])
+  @@map("inventory_location")
 }

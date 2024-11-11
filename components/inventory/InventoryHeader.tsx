@@ -12,6 +12,7 @@ import {
 import InventoryUploadModal from '@/components/Modal/InventoryModal';
 import InventorySearch from './InventorySearch';
 import InventoryTab from './InventoryTab';
+import { useLocations } from '@/hooks/useLocations';
 
 type InventoryHeaderProps = {
   selectedTab: InventoryType | 'ALL';
@@ -47,6 +48,18 @@ export default function InventoryHeader({
     onLocationChange('전체');
   };
 
+  const { data: locations = [] } = useLocations();
+
+  const uniqueLocations = Array.from(
+    new Set<string>(
+      locations
+        .filter((location: { type: InventoryType }) =>
+          selectedTab === 'ALL' ? true : location.type === selectedTab
+        )
+        .map((location: { name: string }) => location.name)
+    )
+  ).sort((a, b) => a.localeCompare(b, 'ko'));
+
   return (
     <div className='sticky top-0 bg-white z-10 border-b p-4 h-[var(--inventory-header-height)]'>
       <div className='flex gap-2 mb-4'>
@@ -65,23 +78,19 @@ export default function InventoryHeader({
       <div className='flex gap-2 overflow-x-auto hide-scrollbar'>
         <Badge
           variant={selectedLocation === '전체' ? 'default' : 'outline'}
-          className={`cursor-pointer transition-opacity ${
-            isLoading ? 'opacity-50 pointer-events-none' : ''
-          }`}
+          className={`cursor-pointer ${isLoading ? 'opacity-50' : ''}`}
           onClick={() => onLocationChange('전체')}
         >
           전체
         </Badge>
-        {Array.from(LOCATIONS[selectedTab]).map((location) => (
+        {uniqueLocations.map((locationName) => (
           <Badge
-            key={location}
-            variant={selectedLocation === location ? 'default' : 'outline'}
-            className={`cursor-pointer transition-opacity ${
-              isLoading ? 'opacity-50 pointer-events-none' : ''
-            }`}
-            onClick={() => onLocationChange(location)}
+            key={locationName}
+            variant={selectedLocation === locationName ? 'default' : 'outline'}
+            className={`cursor-pointer ${isLoading ? 'opacity-50' : ''}`}
+            onClick={() => onLocationChange(locationName)}
           >
-            {getLocationDisplay(selectedTab, location)}
+            {locationName}
           </Badge>
         ))}
       </div>

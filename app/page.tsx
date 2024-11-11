@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import NoticePreview from '@/components/Notice/NoticePreview';
 import Loading from './loading';
 import CreateNotice from '@/components/Notice/CreateNotice';
+import LocationForm from '@/components/location/LocationForm';
 
 async function getNotices() {
   const notices = await prisma.notice.findMany({
@@ -19,6 +20,7 @@ export default async function Home() {
 
   return (
     <div className='container mx-auto px-4'>
+      <LocationForm />
       <div className='sticky top-0 bg-white py-4 z-10'>
         <CreateNotice />
       </div>
