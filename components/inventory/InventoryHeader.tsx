@@ -75,7 +75,9 @@ export default function InventoryHeader({
       <div className='flex gap-2 overflow-x-auto hide-scrollbar'>
         <Badge
           variant={selectedLocation === '전체' ? 'default' : 'outline'}
-          className={`cursor-pointer ${isLoading ? 'opacity-50' : ''}`}
+          className={`cursor-pointer shrink-0 min-w-fit ${
+            isLoading ? 'opacity-50' : ''
+          }`}
           onClick={() => onLocationChange('전체')}
         >
           전체
@@ -84,7 +86,9 @@ export default function InventoryHeader({
           <Badge
             key={locationName}
             variant={selectedLocation === locationName ? 'default' : 'outline'}
-            className={`cursor-pointer ${isLoading ? 'opacity-50' : ''}`}
+            className={`cursor-pointer shrink-0 min-w-fit ${
+              isLoading ? 'opacity-50' : ''
+            }`}
             onClick={() => onLocationChange(locationName)}
           >
             {locationName}
