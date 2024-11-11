@@ -76,7 +76,7 @@ function LocationFormContent({ type, title }: LocationFormProps) {
       });
 
       setName('');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('error', error);
       toast({
         variant: 'destructive',

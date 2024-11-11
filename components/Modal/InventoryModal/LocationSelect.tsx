@@ -7,7 +7,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { getLocationDisplay } from '@/types/inventory';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
 import { $Enums, InventoryType } from '@prisma/client';
 import { useLocations } from '@/hooks/useLocations';

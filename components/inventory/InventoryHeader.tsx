@@ -2,9 +2,7 @@
 'use client';
 import { Badge } from '@/components/ui/badge';
 import {
-  getLocationDisplay,
   InventoryType,
-  LOCATIONS,
   UploadFoodItem,
   UploadSupplyItem,
   InventoryItem,
@@ -41,7 +39,6 @@ export default function InventoryHeader({
   isLoading = false,
   onUpload,
   counts,
-  items,
 }: InventoryHeaderProps) {
   const handleTabChange = (value: InventoryType | 'ALL') => {
     onTabChange(value);
