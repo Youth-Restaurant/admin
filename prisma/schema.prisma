@@ -59,7 +59,7 @@ enum Role {
 
 model User {
   id                     String                   @id @unique
-  // nickname  String
+  nickname               String                   @default("이름")
   // image     String?
   role                   Role                     @default(STUDENT)
   notices                Notice[]
@@ -123,6 +123,7 @@ model Inventory {
   @@index([category])
   @@index([location])
   @@index([createdBy])
+  @@index([updatedBy])
   @@index([status])
   @@map("inventory")
 }

@@ -8,6 +8,8 @@ import {
 import { convertEnumToDisplay, InventoryItem } from '@/types/inventory';
 import { formatDateTime } from '@/utils/date';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type InventoryDetailModalProps = {
   item: InventoryItem;
@@ -24,6 +26,37 @@ export default function InventoryDetailModal({
   imageError,
   onImageError,
 }: InventoryDetailModalProps) {
+  const [createdByUser, setCreatedByUser] = useState<string | null>(null);
+  const [updatedByUser, setUpdatedByUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        console.log('item.createdBy', item.createdBy);
+        console.log('item.updatedBy', item.updatedBy);
+        const [createdResponse, updatedResponse] = await Promise.all([
+          fetch(`/api/user?id=${item.createdBy}`),
+          fetch(`/api/user?id=${item.updatedBy}`),
+        ]);
+
+        if (createdResponse.ok) {
+          const createdData = await createdResponse.json();
+          setCreatedByUser(createdData.nickname);
+        }
+        if (updatedResponse.ok) {
+          const updatedData = await updatedResponse.json();
+          setUpdatedByUser(updatedData.nickname);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [item.createdBy, item.updatedBy, isOpen]);
+
   const renderQuantity = (quantity: number | undefined) => {
     if (quantity === -1) {
       return <span className='text-red-500'>미입력</span>;
@@ -62,6 +95,19 @@ export default function InventoryDetailModal({
         </>
       );
     }
+  };
+
+  const renderUserInfo = (label: string, user: string | null) => {
+    return (
+      <p>
+        <span className='font-semibold'>{label}</span>{' '}
+        {user === null ? (
+          <Skeleton className='h-4 w-24 inline-block' />
+        ) : (
+          user || '알 수 없음'
+        )}
+      </p>
+    );
   };
 
   return (
@@ -121,14 +167,8 @@ export default function InventoryDetailModal({
                 </p>
               )}
               <div className='pt-2 space-y-1 text-gray-500'>
-                <p>
-                  <span className='font-semibold'>등록자:</span>{' '}
-                  {item.createdBy}
-                </p>
-                <p>
-                  <span className='font-semibold'>수정자:</span>{' '}
-                  {item.updatedBy}
-                </p>
+                {renderUserInfo('등록자:', createdByUser)}
+                {renderUserInfo('수정자:', updatedByUser)}
                 <p>
                   <span className='font-semibold'>최근 수정:</span>{' '}
                   {formatDateTime(item.lastUpdated)}

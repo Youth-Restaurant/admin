@@ -77,15 +77,18 @@ export const { handlers, signIn, auth } = NextAuth({
     async signIn({ account, profile, user }) {
       if (account?.provider === 'kakao' && profile && user.id) {
         const id = String(profile?.id);
+        const nickname = profile.kakao_account?.profile?.nickname || '이름';
+
         try {
           await prisma.user.upsert({
             where: { id },
             update: {
+              nickname,
               // image: profile_image || null,
             },
             create: {
               id,
-              // nickname,
+              nickname,
               // image: profile_image || null,
               // email: profile.kakao_account?.email,
               role: 'UNKNOWN',
