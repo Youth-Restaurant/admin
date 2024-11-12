@@ -1,10 +1,9 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
-  console.log(req.query);
+export async function GET(req: NextRequest) {
   try {
-    const userId = req.query.id as string;
+    const userId = req.nextUrl.searchParams.get('id') as string;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -14,12 +13,15 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    return res.status(200).json(user);
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
     console.error('Error fetching user:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
