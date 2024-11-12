@@ -5,6 +5,7 @@ import { InventoryType } from '@prisma/client';
 export async function GET() {
   try {
     const locations = await prisma.inventoryLocation.findMany({
+      where: { parentId: null },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(locations);
