@@ -156,14 +156,16 @@ model EnumReference {
 
 // 위치 모델 수정
 model InventoryLocation {
-  id        Int           @id @default(autoincrement())
-  name      String // @unique 제거
-  type      InventoryType // SUPPLY 또는 FOOD
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  inventory Inventory[] // 관계 설정
+  id           Int                 @id @default(autoincrement())
+  name         String
+  type         InventoryType
+  parentId     Int? // 상위 위치 ID
+  parent       InventoryLocation?  @relation("SubLocations", fields: [parentId], references: [id])
+  subLocations InventoryLocation[] @relation("SubLocations")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  inventory    Inventory[]
 
-  // 이름과 타입의 조합이 유니크하도록 설정
-  @@unique([name, type])
+  @@unique([name, type, parentId])
   @@map("inventory_location")
 }
