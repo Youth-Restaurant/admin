@@ -192,3 +192,14 @@ export const getLocationDisplay = (
   }
   return location;
 };
+
+/**
+ * 기존 타입 정의에 추가
+ */
+export interface LocationItem {
+  id: number;
+  name: string;
+  type: InventoryType;
+  parentId: number | null;
+  subLocations: LocationItem[];
+}
