@@ -59,17 +59,19 @@ export default function InventoryCard({ item }: InventoryCardProps) {
                 </Badge> */}
               </div>
               <div className='text-sm text-gray-500 space-y-1'>
-                <p>
+                <p className='whitespace-nowrap'>
                   <span className='font-semibold'>위치:</span>
-                  {item.parentLocation}{' '}
-                  {item.subLocation && `> ${item.subLocation}`}
+                  <span className='whitespace-nowrap'>
+                    {item.parentLocation}{' '}
+                    {item.subLocation && `> ${item.subLocation}`}
+                  </span>
                 </p>
                 <p>
                   <span className='font-semibold'>수량:</span>
                   {renderQuantity(item.quantity)}
                 </p>
-                <p className='text-xs'>
-                  <span className='font-semibold'>최근 수정:</span>
+                <p className='text-xs whitespace-nowrap'>
+                  <span className='font-semibold'>최근 수정: </span>
                   {formatDateTime(item.lastUpdated)}
                 </p>
               </div>

@@ -63,7 +63,7 @@ export default function InventoryPage() {
         fetchSubLocations={fetchSubLocations}
       />
 
-      <div className='flex-1 px-4'>
+      <div className='flex-1 px-2'>
         {isLoading && items === undefined ? (
           <InventoryListSkeleton />
         ) : (
