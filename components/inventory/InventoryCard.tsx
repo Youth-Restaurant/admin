@@ -1,7 +1,7 @@
 // app/components/inventory/InventoryCard.tsx
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { convertEnumToDisplay, InventoryItem } from '@/types/inventory';
+import { InventoryItem } from '@/types/inventory';
 import { formatDateTime } from '@/utils/date';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -52,11 +52,11 @@ export default function InventoryCard({ item }: InventoryCardProps) {
             <div className='flex-1 min-w-0'>
               <div className='flex items-center gap-2 mb-1'>
                 <h3 className='font-semibold text-lg truncate'>{item.name}</h3>
-                <Badge
+                {/* <Badge
                   variant={item.status === 'SUFFICIENT' ? 'blue' : 'purple'}
                 >
                   {convertEnumToDisplay('status', item.status)}
-                </Badge>
+                </Badge> */}
               </div>
               <div className='text-sm text-gray-500 space-y-1'>
                 <p>
