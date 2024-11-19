@@ -55,6 +55,7 @@ export default function InventoryHeader({
   const [filteredLocations, setFilteredLocations] = useState(locations);
 
   const handleParentLocationClick = async (locationName: string) => {
+    setSelectedParentLocation(locationName);
     if (locationName === '전체') {
       setSubLocations([]);
     } else {
@@ -64,7 +65,6 @@ export default function InventoryHeader({
       );
       setSubLocations(subLocs?.map((loc: { name: string }) => loc.name) || []);
     }
-    setSelectedParentLocation(locationName);
   };
 
   const handleTabChange = (value: InventoryType | 'ALL') => {
