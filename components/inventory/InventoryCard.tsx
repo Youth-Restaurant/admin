@@ -60,7 +60,9 @@ export default function InventoryCard({ item }: InventoryCardProps) {
               </div>
               <div className='text-sm text-gray-500 space-y-1'>
                 <p>
-                  <span className='font-semibold'>위치:</span> {item.location}
+                  <span className='font-semibold'>위치:</span>
+                  {item.parentLocation}{' '}
+                  {item.subLocation && `> ${item.subLocation}`}
                 </p>
                 <p>
                   <span className='font-semibold'>수량:</span>
