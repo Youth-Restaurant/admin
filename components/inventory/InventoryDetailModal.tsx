@@ -97,6 +97,29 @@ export default function InventoryDetailModal({
     }
   };
 
+  const renderLocation = () => {
+    if (!item.parentLocation) {
+      return (
+        <p>
+          <span className='font-semibold'>위치:</span>{' '}
+          <Skeleton className='h-4 w-24 inline-block' />
+        </p>
+      );
+    }
+
+    return (
+      <p>
+        <span className='font-semibold'>위치:</span> {item.parentLocation}
+        {item.subLocation && (
+          <>
+            <span className='mx-1'>{'>'}</span>
+            {item.subLocation}
+          </>
+        )}
+      </p>
+    );
+  };
+
   const renderUserInfo = (label: string, user: string | null) => {
     return (
       <p>
@@ -147,9 +170,7 @@ export default function InventoryDetailModal({
               <Badge variant='outline'>{item.category}</Badge>
             </div>
             <div className='text-sm space-y-1'>
-              <p>
-                <span className='font-semibold'>위치:</span> {item.location}
-              </p>
+              {renderLocation()}
               <p>
                 <span className='font-semibold'>수량:</span>{' '}
                 {renderQuantity(item.quantity)}

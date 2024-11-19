@@ -5,8 +5,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type') as $Enums.InventoryType | null;
-  const location = searchParams.get('location');
+  const type = searchParams.get('type') as $Enums.InventoryType | 'ALL' | null;
+  const parentLocation = searchParams.get('parentLocation');
+  const subLocation = searchParams.get('subLocation');
   const search = searchParams.get('search') || '';
   const page = Number(searchParams.get('page')) || 1;
   const limit = Number(searchParams.get('limit')) || 10;
@@ -14,8 +15,9 @@ export async function GET(request: Request) {
 
   try {
     const where = {
-      ...(type && { type }),
-      ...(location && location !== '전체' && { location }),
+      ...(type && type !== 'ALL' && { type }),
+      ...(parentLocation && parentLocation !== '전체' && { parentLocation }),
+      ...(subLocation && subLocation !== '전체' && { subLocation }),
       ...(search && {
         OR: [
           { name: { contains: search } },
@@ -52,6 +54,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    console.log('data', data);
     const item = await prisma.inventory.create({
       data: {
         ...data,

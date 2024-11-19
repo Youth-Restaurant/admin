@@ -2,11 +2,17 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { InventoryType } from '@prisma/client';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const type = searchParams.get('type') as InventoryType | null;
+
   try {
     const locations = await prisma.inventoryLocation.findMany({
-      where: { parentId: null },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        parentId: null,
+        ...(type && { type }),
+      },
+      orderBy: { name: 'asc' },
     });
     return NextResponse.json(locations);
   } catch (error) {

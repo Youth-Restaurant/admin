@@ -29,7 +29,7 @@ import { FoodFields } from './FoodFields';
 import ImageUploader from '@/components/ImageUploader';
 import InventoryTab from '@/components/inventory/InventoryTab';
 import RequiredIndicator from '@/components/\bRequiredIndicator';
-import { $Enums, SupplyLocation, FoodLocation } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 
 type InventoryUploadModalProps = {
@@ -46,6 +46,8 @@ type CommonFields = Pick<
   | 'memo'
   | 'imageUrl'
   | 'updatedBy'
+  | 'parentLocation'
+  | 'subLocation'
 >;
 
 type FormState = Record<InventoryType, UploadSupplyItem | UploadFoodItem>;
@@ -58,13 +60,14 @@ const getInitialCommonFields = (createdBy: string): CommonFields => ({
   updatedBy: createdBy || '',
   memo: '',
   imageUrl: '',
+  parentLocation: '',
+  subLocation: '',
 });
 
 const getTypeSpecificFields = (type: InventoryType) => {
   if (type === 'SUPPLY') {
     return {
       type: 'SUPPLY' as const,
-      location: '' as SupplyLocation,
       category: '' as SupplyCategoryType,
       manufacturer: '',
       modelNumber: '',
@@ -72,7 +75,6 @@ const getTypeSpecificFields = (type: InventoryType) => {
   } else {
     return {
       type: 'FOOD' as const,
-      location: '' as FoodLocation,
       category: '' as FoodCategoryType,
       expirationDate: undefined,
     };
@@ -138,8 +140,6 @@ export default function InventoryUploadModal({
     const commonFieldsValid = isValidName(commonFields.name);
 
     const typeSpecificFieldsValid =
-      typeSpecificFields.location != null &&
-      typeSpecificFields.location.length > 0 &&
       typeSpecificFields.category != null &&
       typeSpecificFields.category.length > 0;
 
@@ -313,7 +313,6 @@ export default function InventoryUploadModal({
 
           <LocationSelect
             selectedTab={selectedTab}
-            value={typeSpecificFields.location}
             onChange={handleChange}
             required
           />

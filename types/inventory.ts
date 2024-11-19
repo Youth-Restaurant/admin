@@ -75,6 +75,9 @@ interface BaseInventoryItem {
   memo?: string;
   minimumQuantity?: number;
   imageUrl?: string;
+  locationId?: number;
+  parentLocation?: string;
+  subLocation?: string;
 }
 
 /**
@@ -83,7 +86,6 @@ interface BaseInventoryItem {
 export interface SupplyItem extends BaseInventoryItem {
   type: typeof $Enums.InventoryType.SUPPLY;
   category: SupplyCategoryType;
-  location: SupplyLocation;
   manufacturer?: string;
   modelNumber?: string;
 }
@@ -94,7 +96,6 @@ export interface SupplyItem extends BaseInventoryItem {
 export interface FoodItem extends BaseInventoryItem {
   type: typeof $Enums.InventoryType.FOOD;
   category: FoodCategoryType;
-  location: FoodLocation;
   expirationDate?: string;
 }
 

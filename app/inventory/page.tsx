@@ -10,24 +10,30 @@ import InventoryListSkeleton from '@/components/inventory/InventoryListSkeleton'
 export default function InventoryPage() {
   const {
     selectedTab,
-    selectedLocation,
+    selectedParentLocation,
+    selectedSubLocation,
     searchQuery,
+    locations,
     items,
     isLoading,
-    setSelectedLocation,
-    setSearchQuery,
-    handleUpload,
-    setSelectedTab,
     fetchNextPage,
     hasNextPage,
     counts,
+    handleUpload,
+    setSelectedTab,
+    setSelectedParentLocation,
+    setSelectedSubLocation,
+    setSearchQuery,
+    fetchSubLocations,
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
+    console.log('items', items);
     if (items === undefined) return [];
     const locationFiltered = items.filter(
       (item) =>
-        selectedLocation === '전체' || item.location === selectedLocation
+        selectedParentLocation === '전체' ||
+        item.parentLocation === selectedParentLocation
     );
 
     return locationFiltered.filter(
@@ -36,21 +42,25 @@ export default function InventoryPage() {
         matchKoreanText(item.category, searchQuery) ||
         matchKoreanText(item.location, searchQuery)
     );
-  }, [items, selectedLocation, searchQuery]);
+  }, [items, selectedParentLocation, searchQuery]);
 
   return (
     <div className='flex flex-col min-h-full'>
       <InventoryHeader
         selectedTab={selectedTab}
-        selectedLocation={selectedLocation}
+        selectedParentLocation={selectedParentLocation}
+        selectedSubLocation={selectedSubLocation}
         searchQuery={searchQuery}
-        onTabChange={setSelectedTab}
-        onLocationChange={setSelectedLocation}
+        setSelectedTab={setSelectedTab}
+        setSelectedParentLocation={setSelectedParentLocation}
+        setSelectedSubLocation={setSelectedSubLocation}
         onSearchChange={setSearchQuery}
         isLoading={isLoading}
         onUpload={handleUpload}
         counts={counts}
         items={items}
+        locations={locations}
+        fetchSubLocations={fetchSubLocations}
       />
 
       <div className='flex-1 px-4'>

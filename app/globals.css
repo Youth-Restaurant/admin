@@ -29,7 +29,7 @@ body {
   :root {
     --header-height: 50px;
     --bottom-nav-height: 72px;
-    --inventory-header-height: 169px;
+    --inventory-header-height: 180px;
     --inventory-card-height: 120px;
     --inventory-card-gap: 10px;
 

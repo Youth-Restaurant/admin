@@ -1,63 +1,87 @@
 import { $Enums } from '@prisma/client';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useState, useCallback, useEffect } from 'react';
 import { UploadSupplyItem, UploadFoodItem } from '@/types/inventory';
 
 export function useInventoryState() {
+  // 상태 관리
   const [selectedTab, setSelectedTab] = useState<$Enums.InventoryType | 'ALL'>(
     'ALL'
   );
-  const [selectedLocation, setSelectedLocation] = useState<string>('전체');
+  const [selectedParentLocation, setSelectedParentLocation] =
+    useState<string>('전체');
+  const [selectedSubLocation, setSelectedSubLocation] =
+    useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [counts, setCounts] = useState({
     ALL: 0,
     SUPPLY: 0,
     FOOD: 0,
   });
-  const [isCountLoading, setIsCountLoading] = useState(true);
 
-  // 각 탭의 총 갯수를 가져오는 함수
-  const fetchCounts = async () => {
-    setIsCountLoading(true);
-    try {
-      const [allCount, supplyCount, foodCount] = await Promise.all([
-        fetch('/api/inventory/count').then((res) => res.json()),
-        fetch('/api/inventory/count?type=SUPPLY').then((res) => res.json()),
-        fetch('/api/inventory/count?type=FOOD').then((res) => res.json()),
-      ]);
-
-      setCounts({
-        ALL: allCount.total,
-        SUPPLY: supplyCount.total,
-        FOOD: foodCount.total,
-      });
-    } catch (error) {
-      console.error('Error fetching counts:', error);
-    } finally {
-      setIsCountLoading(false);
-    }
-  };
-
-  // 초기 로딩 시 카운트 가져오기
-  useEffect(() => {
-    fetchCounts();
+  const fetchCounts = useCallback(async () => {
+    const response = await fetch('/api/inventory/counts');
+    if (!response.ok) throw new Error('Failed to fetch counts');
+    const data = await response.json();
+    console.log('data', data);
+    setCounts(data);
   }, []);
 
-  // 기존의 무한 스크롤 쿼리
+  useEffect(() => {
+    fetchCounts();
+  }, [fetchCounts]);
+
+  // 위치 데이터 쿼리
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations'],
+    queryFn: async () => {
+      const response = await fetch('/api/locations');
+      if (!response.ok) throw new Error('Failed to fetch locations');
+      return response.json();
+    },
+  });
+
+  // 서브로케이션 fetch
+  const fetchSubLocations = useCallback(
+    async (parentName: string) => {
+      try {
+        const response = await fetch(
+          `/api/locations/sub?parent=${encodeURIComponent(
+            parentName
+          )}&type=${selectedTab}`
+        );
+        if (!response.ok) throw new Error('Failed to fetch sub locations');
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching sub locations:', error);
+        return [];
+      }
+    },
+    [selectedTab]
+  );
+
+  // 인벤토리 데이터 쿼리
   const { data, fetchNextPage, hasNextPage, isLoading, refetch } =
     useInfiniteQuery({
-      queryKey: ['inventory', selectedTab, selectedLocation, searchQuery],
+      queryKey: [
+        'inventory',
+        selectedTab,
+        selectedParentLocation,
+        selectedSubLocation,
+        searchQuery,
+      ],
       queryFn: async ({ pageParam = 1 }) => {
         const params = new URLSearchParams({
           page: String(pageParam),
           limit: '10',
           ...(selectedTab !== 'ALL' && { type: selectedTab }),
-          location: selectedLocation,
+          parentLocation: selectedParentLocation,
+          subLocation: selectedSubLocation,
           search: searchQuery,
         });
-
         const response = await fetch(`/api/inventory?${params}`);
         const data = await response.json();
+        console.log('data', data);
         return data;
       },
       getNextPageParam: (lastPage) => {
@@ -67,7 +91,7 @@ export function useInventoryState() {
       initialPageParam: 1,
     });
 
-  // 업로드 후 카운트도 함께 갱신
+  // 업로드 핸들러
   const handleUpload = async (data: UploadSupplyItem | UploadFoodItem) => {
     try {
       const response = await fetch('/api/inventory', {
@@ -90,21 +114,22 @@ export function useInventoryState() {
     }
   };
 
-  const items = data?.pages.flatMap((page) => page.items) ?? [];
-
   return {
     selectedTab,
-    selectedLocation,
+    selectedParentLocation,
+    selectedSubLocation,
     searchQuery,
-    items,
+    locations,
+    items: data?.pages.flatMap((page) => page.items) ?? [],
     isLoading,
     hasNextPage,
     fetchNextPage,
-    setSelectedLocation,
+    setSelectedParentLocation,
+    setSelectedSubLocation,
     setSearchQuery,
     handleUpload,
     setSelectedTab,
     counts,
-    isCountLoading,
+    fetchSubLocations,
   };
 }

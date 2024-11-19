@@ -92,7 +92,8 @@ model Inventory {
   type            InventoryType   @default(SUPPLY)
   quantity        Int?            @default(-1)
   status          InventoryStatus @default(SUFFICIENT)
-  location        String
+  parentLocation  String // 상위 위치
+  subLocation     String? // 하위 위치 (선택적)
   category        String
   imageUrl        String?
   lastUpdated     DateTime        @default(now())
@@ -121,7 +122,8 @@ model Inventory {
 
   @@index([type])
   @@index([category])
-  @@index([location])
+  @@index([parentLocation])
+  @@index([subLocation])
   @@index([createdBy])
   @@index([updatedBy])
   @@index([status])

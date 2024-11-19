@@ -1,18 +1,51 @@
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { InventoryType } from '@prisma/client';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const parentName = searchParams.get('parent');
+  const type = searchParams.get('type') as InventoryType | 'ALL' | null;
+
+  console.log('parentName', parentName);
+  console.log('type', type);
+
+  if (!parentName) {
+    return NextResponse.json(
+      { error: 'Parent name is required' },
+      { status: 400 }
+    );
+  }
+
   try {
-    const locations = await prisma.inventoryLocation.findMany({
+    // 먼저 부모 위치를 찾습니다
+    const parentLocation = await prisma.inventoryLocation.findFirst({
       where: {
-        parentId: null, // 최상위 위치만 가져옴
+        name: parentName,
+        parentId: null,
+        ...(type && type !== 'ALL' && { type }),
       },
     });
-    return NextResponse.json(locations);
+
+    if (!parentLocation) {
+      return NextResponse.json([]);
+    }
+
+    // 해당 부모의 하위 위치들을 조회합니다
+    const subLocations = await prisma.inventoryLocation.findMany({
+      where: {
+        parentId: parentLocation.id,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return NextResponse.json(subLocations);
   } catch (error) {
-    console.error('Failed to fetch locations:', error);
+    console.error('Failed to fetch sub locations:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch locations' },
+      { error: 'Failed to fetch sub locations' },
       { status: 500 }
     );
   }
