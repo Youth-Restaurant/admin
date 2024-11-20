@@ -25,6 +25,7 @@ export default function InventoryPage() {
     setSelectedSubLocation,
     setSearchQuery,
     fetchSubLocations,
+    isSubLocationLoading,
   } = useInventoryState();
 
   const filteredAndSearchedItems = useMemo(() => {
@@ -61,6 +62,7 @@ export default function InventoryPage() {
         items={items}
         locations={locations}
         fetchSubLocations={fetchSubLocations}
+        isSubLocationLoading={isSubLocationLoading}
       />
 
       <div className='flex-1 px-2'>

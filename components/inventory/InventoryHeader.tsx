@@ -34,6 +34,7 @@ type InventoryHeaderProps = {
   };
   items: InventoryItem[];
   locations: { name: string; type: InventoryType }[];
+  isSubLocationLoading: boolean;
 };
 
 export default function InventoryHeader({
@@ -50,6 +51,7 @@ export default function InventoryHeader({
   counts,
   locations,
   fetchSubLocations,
+  isSubLocationLoading,
 }: InventoryHeaderProps) {
   const [subLocations, setSubLocations] = useState<string[]>([]);
   const [filteredLocations, setFilteredLocations] = useState(locations);
@@ -130,7 +132,7 @@ export default function InventoryHeader({
           <Badge
             variant={selectedParentLocation === '전체' ? 'default' : 'outline'}
             className={`cursor-pointer shrink-0 min-w-fit ${
-              isLoading ? 'opacity-50' : ''
+              isLoading || isSubLocationLoading ? 'opacity-50' : ''
             }`}
             onClick={() => {
               handleParentLocationClick('전체');
@@ -149,7 +151,7 @@ export default function InventoryHeader({
                     : 'outline'
                 }
                 className={`cursor-pointer shrink-0 min-w-fit ${
-                  isLoading ? 'opacity-50' : ''
+                  isLoading || isSubLocationLoading ? 'opacity-50' : ''
                 }`}
                 onClick={() => {
                   handleParentLocationClick(location.name);
@@ -162,11 +164,12 @@ export default function InventoryHeader({
           )}
         </div>
 
+        {/* 서브 위치 */}
         <div className='flex gap-2 overflow-x-auto hide-scrollbar pl-4'>
           <Badge
             variant={selectedSubLocation === '전체' ? 'default' : 'outline'}
             className={`cursor-pointer shrink-0 min-w-fit ${
-              isLoading ? 'opacity-50' : ''
+              isLoading || isSubLocationLoading ? 'opacity-50' : ''
             }`}
             onClick={() => setSelectedSubLocation('전체')}
           >
@@ -179,7 +182,7 @@ export default function InventoryHeader({
                 selectedSubLocation === locationName ? 'default' : 'outline'
               }
               className={`cursor-pointer shrink-0 min-w-fit ${
-                isLoading ? 'opacity-50' : ''
+                isLoading || isSubLocationLoading ? 'opacity-50' : ''
               }`}
               onClick={() => {
                 setSelectedSubLocation(locationName);

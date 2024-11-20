@@ -18,9 +18,12 @@ export function useInventoryState() {
     SUPPLY: 0,
     FOOD: 0,
   });
+  const [isSubLocationLoading, setIsSubLocationLoading] = useState(false);
 
   const fetchCounts = useCallback(async () => {
-    const response = await fetch('/api/inventory/counts');
+    const response = await fetch('/api/inventory/counts', {
+      cache: 'no-store',
+    });
     if (!response.ok) throw new Error('Failed to fetch counts');
     const data = await response.json();
     console.log('data', data);
@@ -44,6 +47,7 @@ export function useInventoryState() {
   // 서브로케이션 fetch
   const fetchSubLocations = useCallback(
     async (parentName: string) => {
+      setIsSubLocationLoading(true);
       try {
         const response = await fetch(
           `/api/locations/sub?parent=${encodeURIComponent(
@@ -55,6 +59,8 @@ export function useInventoryState() {
       } catch (error) {
         console.error('Error fetching sub locations:', error);
         return [];
+      } finally {
+        setIsSubLocationLoading(false);
       }
     },
     [selectedTab]
@@ -131,5 +137,6 @@ export function useInventoryState() {
     setSelectedTab,
     counts,
     fetchSubLocations,
+    isSubLocationLoading,
   };
 }
