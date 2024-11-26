@@ -7,6 +7,111 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                     String                   @id @unique
+  role                   Role                     @default(STUDENT)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  nickname               String                   @default("이름")
+  inventory              Inventory[]
+  InventoryUpdateHistory InventoryUpdateHistory[]
+  notices                Notice[]
+
+  @@map("user")
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  author    String
+  role      Role
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  avatarUrl String
+  userId    String?
+  User      User?    @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([userId], map: "notice_userId_fkey")
+  @@map("notice")
+}
+
+model Inventory {
+  id              Int                      @id @default(autoincrement())
+  name            String
+  type            InventoryType            @default(SUPPLY)
+  quantity        Int?                     @default(-1)
+  status          InventoryStatus          @default(SUFFICIENT)
+  category        String
+  imageUrl        String?
+  lastUpdated     DateTime                 @default(now())
+  createdBy       String
+  updatedBy       String
+  memo            String?                  @db.Text
+  minimumQuantity Int?
+  manufacturer    String?
+  modelNumber     String?
+  expirationDate  DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  locationId      Int?
+  parentLocation  String
+  subLocation     String?
+  user            User                     @relation(fields: [createdBy], references: [id])
+  locationRef     InventoryLocation?       @relation(fields: [locationId], references: [id])
+  updateHistory   InventoryUpdateHistory[]
+
+  @@index([type])
+  @@index([category])
+  @@index([parentLocation])
+  @@index([subLocation])
+  @@index([createdBy])
+  @@index([updatedBy])
+  @@index([status])
+  @@index([locationId], map: "inventory_locationId_fkey")
+  @@map("inventory")
+}
+
+model InventoryUpdateHistory {
+  id          Int       @id @default(autoincrement())
+  inventoryId Int
+  updatedBy   String
+  changes     Json
+  updatedAt   DateTime  @default(now())
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  user        User      @relation(fields: [updatedBy], references: [id])
+
+  @@index([inventoryId])
+  @@index([updatedBy])
+  @@map("inventory_update_history")
+}
+
+model EnumReference {
+  id             Int            @id @default(autoincrement())
+  supplyCategory SupplyCategory
+  foodCategory   FoodCategory
+  supplyLocation SupplyLocation
+  foodLocation   FoodLocation
+  createdAt      DateTime       @default(now())
+
+  @@map("enum_reference")
+}
+
+model InventoryLocation {
+  id           Int                 @id @default(autoincrement())
+  name         String
+  type         InventoryType
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  parentId     Int?
+  inventory    Inventory[]
+  parent       InventoryLocation?  @relation("SubLocations", fields: [parentId], references: [id])
+  subLocations InventoryLocation[] @relation("SubLocations")
+
+  @@unique([name, type, parentId])
+  @@index([parentId], map: "inventory_location_parentId_fkey")
+  @@map("inventory_location")
+}
+
 enum InventoryType {
   SUPPLY @map("물품")
   FOOD   @map("식재료")
@@ -55,119 +160,4 @@ enum Role {
   TEACHER     @map("선생")
   STUDENT     @map("학생")
   UNKNOWN     @map("직급")
-}
-
-model User {
-  id                     String                   @id @unique
-  nickname               String                   @default("이름")
-  // image     String?
-  role                   Role                     @default(STUDENT)
-  notices                Notice[]
-  inventory              Inventory[]
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  // email     String?
-  InventoryUpdateHistory InventoryUpdateHistory[]
-
-  @@map("user")
-}
-
-model Notice {
-  id        Int      @id @default(autoincrement())
-  author    String
-  role      Role
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  avatarUrl String
-  User      User?    @relation(fields: [userId], references: [id])
-  userId    String?
-
-  @@index([createdAt])
-  @@map("notice")
-}
-
-model Inventory {
-  id              Int             @id @default(autoincrement())
-  name            String
-  type            InventoryType   @default(SUPPLY)
-  quantity        Int?            @default(-1)
-  status          InventoryStatus @default(SUFFICIENT)
-  parentLocation  String // 상위 위치
-  subLocation     String? // 하위 위치 (선택적)
-  category        String
-  imageUrl        String?
-  lastUpdated     DateTime        @default(now())
-  createdBy       String
-  updatedBy       String
-  user            User            @relation(fields: [createdBy], references: [id])
-  memo            String?         @db.Text
-  minimumQuantity Int?
-
-  // Supply-specific fields
-  manufacturer String?
-  modelNumber  String?
-
-  // Food-specific fields
-  expirationDate DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relation to update history
-  updateHistory InventoryUpdateHistory[]
-
-  // 위치 모델 연결
-  locationId  Int?
-  locationRef InventoryLocation? @relation(fields: [locationId], references: [id])
-
-  @@index([type])
-  @@index([category])
-  @@index([parentLocation])
-  @@index([subLocation])
-  @@index([createdBy])
-  @@index([updatedBy])
-  @@index([status])
-  @@map("inventory")
-}
-
-model InventoryUpdateHistory {
-  id          Int       @id @default(autoincrement())
-  inventoryId Int
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
-  updatedBy   String
-  user        User      @relation(fields: [updatedBy], references: [id])
-  changes     Json // 변경된 필드와 값을 JSON 형태로 저장
-  updatedAt   DateTime  @default(now())
-
-  @@index([inventoryId])
-  @@index([updatedBy])
-  @@map("inventory_update_history")
-}
-
-// Enum reference model for type safety
-model EnumReference {
-  id             Int            @id @default(autoincrement())
-  supplyCategory SupplyCategory
-  foodCategory   FoodCategory
-  supplyLocation SupplyLocation
-  foodLocation   FoodLocation
-  createdAt      DateTime       @default(now())
-
-  @@map("enum_reference")
-}
-
-// 위치 모델 수정
-model InventoryLocation {
-  id           Int                 @id @default(autoincrement())
-  name         String
-  type         InventoryType
-  parentId     Int? // 상위 위치 ID
-  parent       InventoryLocation?  @relation("SubLocations", fields: [parentId], references: [id])
-  subLocations InventoryLocation[] @relation("SubLocations")
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  inventory    Inventory[]
-
-  @@unique([name, type, parentId])
-  @@map("inventory_location")
 }
