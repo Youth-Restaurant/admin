@@ -53,10 +53,12 @@ export default function Page() {
 
       days.push(
         <div
-          key={day}
+          key={`${year}-${month}-${day}`}
           className={cn(
-            'p-1 text-center transition-colors hover:bg-muted rounded-md cursor-pointer',
-            isToday && 'bg-primary text-primary-foreground hover:bg-primary/90'
+            'p-3 text-center transition-colors hover:bg-muted rounded-md cursor-pointer',
+            isToday
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'hover:bg-muted'
           )}
         >
           {day}
