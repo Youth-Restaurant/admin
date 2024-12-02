@@ -272,7 +272,7 @@ export function ReservationForm() {
 
         <div className='space-y-2'>
           <div className='flex items-center justify-between'>
-            <Label className='font-bold'>테블 선택</Label>
+            <Label className='font-bold'>테이블 선택</Label>
             <div className='space-x-2'>
               <Button variant='outline' size='sm' onClick={selectAllTables}>
                 모두 선택
