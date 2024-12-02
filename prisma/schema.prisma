@@ -59,6 +59,9 @@ model Inventory {
   user            User                     @relation(fields: [createdBy], references: [id])
   locationRef     InventoryLocation?       @relation(fields: [locationId], references: [id])
   updateHistory   InventoryUpdateHistory[]
+  mainCategory    String?
+  subCategory     String?
+  reservations    Reservation[]
 
   @@index([type])
   @@index([category])
@@ -68,6 +71,8 @@ model Inventory {
   @@index([updatedBy])
   @@index([status])
   @@index([locationId], map: "inventory_locationId_fkey")
+  @@index([mainCategory])
+  @@index([subCategory])
   @@map("inventory")
 }
 
@@ -160,4 +165,58 @@ enum Role {
   TEACHER     @map("선생")
   STUDENT     @map("학생")
   UNKNOWN     @map("직급")
+}
+
+model RestaurantTable {
+  id           Int                @id @default(autoincrement())
+  tableNumber  Int                @unique
+  capacity     Int
+  location     String
+  reservations ReservationTable[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@map("restaurant_tables")
+}
+
+model Guest {
+  id              Int           @id @default(autoincrement())
+  name            String
+  lastBookingDate DateTime
+  gender          String?
+  reservations    Reservation[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("guests")
+}
+
+model Reservation {
+  id              Int                @id @default(autoincrement())
+  guestId         Int
+  reservationDate DateTime
+  numberOfGuests  Int
+  usageDate       DateTime
+  isCanceled      Boolean            @default(false)
+  inventoryId     Int?
+  additionalNotes String?            @db.Text
+  guest           Guest              @relation(fields: [guestId], references: [id])
+  inventory       Inventory?         @relation(fields: [inventoryId], references: [id])
+  tables          ReservationTable[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@map("reservations")
+}
+
+model ReservationTable {
+  id            Int             @id @default(autoincrement())
+  reservationId Int
+  tableId       Int
+  seatsUsed     Int
+  reservation   Reservation     @relation(fields: [reservationId], references: [id])
+  table         RestaurantTable @relation(fields: [tableId], references: [id])
+
+  @@unique([reservationId, tableId])
+  @@map("reservation_tables")
 }
