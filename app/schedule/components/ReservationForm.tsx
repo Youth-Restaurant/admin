@@ -1,3 +1,4 @@
+// app/schedule/components/ReservationForm.tsx
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Card } from '@/components/ui/card';
 import { Users } from 'lucide-react';
@@ -22,6 +23,9 @@ import {
   MENU_OPTIONS,
 } from '@/constants';
 import { DrinkSelection } from './DrinkSelection';
+import { useRouter } from 'next/navigation';
+import { toast } from '@/hooks/use-toast';
+import { useSession } from 'next-auth/react';
 
 const TABLE_OPTIONS = Array.from({ length: 15 }, (_, i) => i + 1);
 
@@ -33,7 +37,17 @@ interface Inventory {
   status: 'SUFFICIENT' | 'LOW';
 }
 
-export function ReservationForm() {
+interface ReservationFormProps {
+  onClose: () => void;
+  selectedDate: Date;
+}
+
+export function ReservationForm({
+  onClose,
+  selectedDate,
+}: ReservationFormProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
   const [period, setPeriod] = useState<'AM' | 'PM'>('AM');
   const [hour, setHour] = useState('9');
@@ -46,8 +60,18 @@ export function ReservationForm() {
     Record<string, Inventory>
   >({});
   const [isLoading, setIsLoading] = useState(true);
+  const [description, setDescription] = useState('');
 
   const minuteOptions = Array.from({ length: 12 }, (_, i) => i * 5);
+
+  useLayoutEffect(() => {
+    if (period === 'AM') {
+      setHour('9');
+    } else {
+      setHour('12');
+    }
+    setMinute('0');
+  }, [period]);
 
   // 음료 재고 데이터 가져오기
   useEffect(() => {
@@ -97,12 +121,17 @@ export function ReservationForm() {
   };
 
   const handlePeriodChange = (value: 'AM' | 'PM') => {
-    setPeriod(value);
-    if (value === 'PM') {
-      setHour('12');
-    } else {
-      setHour('9');
+    if (value) {
+      setPeriod(value);
     }
+  };
+
+  const handleHourChange = (hour: string) => {
+    setHour(hour);
+  };
+
+  const handleMinuteChange = (minute: string) => {
+    setMinute(minute);
   };
 
   const calculateTotalPrice = () => {
@@ -146,8 +175,60 @@ export function ReservationForm() {
     );
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid()) return;
+
+    if (!session?.user?.id) {
+      toast({
+        title: '로그인이 필요합니다.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Combine selected date with time
+    const combinedDateTime = new Date(selectedDate);
+    combinedDateTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
+
+    try {
+      const response = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName,
+          reservationTime: combinedDateTime,
+          numberOfPeople: Number(people),
+          tableNumbers: selectedTables,
+          drinks: selectedDrinks,
+          description: description.trim() || undefined,
+          userId: session.user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('예약 생성에 실패했습니다.');
+      }
+
+      // 성공 시 처리 순서 변경
+      router.refresh(); // 먼저 데이터 리프레시
+      onClose(); // 모달 닫기
+      toast({
+        title: '예약이 성공적으로 생성되었습니다.',
+      });
+    } catch (error) {
+      console.error('예약 생성 중 오류 발생:', error);
+      toast({
+        title: '예약 생성 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
-    <div className='flex flex-col h-full mb-1'>
+    <form onSubmit={handleSubmit} className='flex flex-col h-full mb-1'>
       <div className='space-y-5 flex-1 overflow-y-auto scrollbar-hide p-1'>
         <div className='space-y-2'>
           <Label htmlFor='customerName' className='font-bold'>
@@ -188,20 +269,20 @@ export function ReservationForm() {
         </div>
 
         <div className='flex items-center gap-2 ml-1'>
-          <Select value={hour} onValueChange={setHour}>
+          <Select value={hour} onValueChange={handleHourChange}>
             <SelectTrigger className='w-24'>
               <SelectValue placeholder='시' />
             </SelectTrigger>
             <SelectContent>
-              {period === 'AM'
-                ? Array.from({ length: 3 }, (_, i) => i + 9).map((hour) => (
-                    <SelectItem key={hour} value={hour.toString()}>
-                      {hour}
-                    </SelectItem>
-                  ))
-                : Array.from({ length: 11 }, (_, i) => i + 12).map((hour) => (
+              {period === 'PM'
+                ? Array.from({ length: 11 }, (_, i) => i + 12).map((hour) => (
                     <SelectItem key={hour} value={hour.toString()}>
                       {hour === 12 ? '12' : `${hour - 12}`}
+                    </SelectItem>
+                  ))
+                : Array.from({ length: 3 }, (_, i) => i + 9).map((hour) => (
+                    <SelectItem key={hour} value={hour.toString()}>
+                      {hour}
                     </SelectItem>
                   ))}
             </SelectContent>
@@ -209,7 +290,7 @@ export function ReservationForm() {
 
           <span>시</span>
 
-          <Select value={minute} onValueChange={setMinute}>
+          <Select value={minute} onValueChange={handleMinuteChange}>
             <SelectTrigger className='w-24'>
               <SelectValue placeholder='분' />
             </SelectTrigger>
@@ -274,10 +355,20 @@ export function ReservationForm() {
           <div className='flex items-center justify-between'>
             <Label className='font-bold'>테이블 선택</Label>
             <div className='space-x-2'>
-              <Button variant='outline' size='sm' onClick={selectAllTables}>
+              <Button
+                variant='outline'
+                size='sm'
+                type='button'
+                onClick={selectAllTables}
+              >
                 모두 선택
               </Button>
-              <Button variant='outline' size='sm' onClick={clearTableSelection}>
+              <Button
+                variant='outline'
+                size='sm'
+                type='button'
+                onClick={clearTableSelection}
+              >
                 선택 취소
               </Button>
             </div>
@@ -293,6 +384,7 @@ export function ReservationForm() {
                   <Button
                     variant='outline'
                     size='sm'
+                    type='button'
                     onClick={() =>
                       selectHallTables(HALL_1_TABLES.map((t) => t.number))
                     }
@@ -302,6 +394,7 @@ export function ReservationForm() {
                   <Button
                     variant='outline'
                     size='sm'
+                    type='button'
                     onClick={() =>
                       clearHallTables(HALL_1_TABLES.map((t) => t.number))
                     }
@@ -315,6 +408,7 @@ export function ReservationForm() {
                   {HALL_1_TABLES.slice(0, 4).map((table) => (
                     <Button
                       key={table.number}
+                      type='button'
                       variant={
                         selectedTables.includes(table.number)
                           ? 'default'
@@ -341,6 +435,7 @@ export function ReservationForm() {
                   {HALL_1_TABLES.slice(4).map((table) => (
                     <Button
                       key={table.number}
+                      type='button'
                       variant={
                         selectedTables.includes(table.number)
                           ? 'default'
@@ -375,6 +470,7 @@ export function ReservationForm() {
                   <Button
                     variant='outline'
                     size='sm'
+                    type='button'
                     onClick={() =>
                       selectHallTables(HALL_2_TABLES.map((t) => t.number))
                     }
@@ -384,6 +480,7 @@ export function ReservationForm() {
                   <Button
                     variant='outline'
                     size='sm'
+                    type='button'
                     onClick={() =>
                       clearHallTables(HALL_2_TABLES.map((t) => t.number))
                     }
@@ -403,6 +500,7 @@ export function ReservationForm() {
                       return (
                         <Button
                           key={table.number}
+                          type='button'
                           variant={
                             selectedTables.includes(table.number)
                               ? 'default'
@@ -436,6 +534,7 @@ export function ReservationForm() {
                       return (
                         <Button
                           key={table.number}
+                          type='button'
                           variant={
                             selectedTables.includes(table.number)
                               ? 'default'
@@ -470,6 +569,7 @@ export function ReservationForm() {
                     return (
                       <Button
                         key={table.number}
+                        type='button'
                         variant={
                           selectedTables.includes(table.number)
                             ? 'default'
@@ -505,6 +605,8 @@ export function ReservationForm() {
           </Label>
           <Textarea
             id='description'
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder='특이 사항을 입력하세요'
             className='w-[99%] ml-1'
             rows={5}
@@ -513,10 +615,10 @@ export function ReservationForm() {
       </div>
 
       <div className='mt-4 pt-4 border-t'>
-        <Button className='w-full' disabled={!isFormValid()}>
+        <Button type='submit' className='w-full' disabled={!isFormValid()}>
           예약 추가
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
