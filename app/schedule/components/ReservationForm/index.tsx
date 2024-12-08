@@ -1,3 +1,4 @@
+// app/schedule/components/ReservationForm/index.tsx
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,46 @@ import { ReservationFormProps, Inventory } from './types';
 import { DrinkSelection } from '../DrinkSelection';
 
 const TABLE_OPTIONS = Array.from({ length: 15 }, (_, i) => i + 1);
+
+export interface ReservationData {
+  customerName: string;
+  reservationTime: Date;
+  numberOfPeople: number;
+  tableNumbers: number[];
+  drinks: string[];
+  description?: string;
+  userId: string;
+}
+
+export async function handleReservationSubmit(
+  data: ReservationData
+): Promise<boolean> {
+  try {
+    const response = await fetch('/api/reservations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('예약 생성에 실패했습니다.');
+    }
+
+    toast({
+      title: '예약이 성공적으로 생성되었습니다.',
+    });
+    return true;
+  } catch (error) {
+    console.error('예약 생성 중 오류 발생:', error);
+    toast({
+      title: '예약 생성 중 오류가 발생했습니다.',
+      variant: 'destructive',
+    });
+    return false;
+  }
+}
 
 export function ReservationForm({
   onClose,
@@ -131,38 +172,20 @@ export function ReservationForm({
     const combinedDateTime = new Date(selectedDate);
     combinedDateTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
 
-    try {
-      const response = await fetch('/api/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerName,
-          reservationTime: combinedDateTime,
-          numberOfPeople: Number(people),
-          tableNumbers: selectedTables,
-          drinks: selectedDrinks,
-          description: description.trim() || undefined,
-          userId: session.user.id,
-        }),
-      });
+    const reservationData = {
+      customerName,
+      reservationTime: combinedDateTime,
+      numberOfPeople: Number(people),
+      tableNumbers: selectedTables,
+      drinks: selectedDrinks,
+      description: description.trim() || undefined,
+      userId: session.user.id,
+    };
 
-      if (!response.ok) {
-        throw new Error('예약 생성에 실패했습니다.');
-      }
-
+    const success = await handleReservationSubmit(reservationData);
+    if (success) {
       router.refresh();
       onClose();
-      toast({
-        title: '예약이 성공적으로 생성되었습니다.',
-      });
-    } catch (error) {
-      console.error('예약 생성 중 오류 발생:', error);
-      toast({
-        title: '예약 생성 중 오류가 발생했습니다.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -170,7 +193,11 @@ export function ReservationForm({
     <form onSubmit={handleSubmit} className='flex flex-col h-full mb-1'>
       <div className='space-y-5 flex-1 overflow-y-auto scrollbar-hide p-1'>
         {/* 고객 명칭 */}
-        <CustomerSection value={customerName} onChange={setCustomerName} />
+        <CustomerSection
+          value={customerName}
+          onChange={setCustomerName}
+          inputClassName='w-auto'
+        />
 
         {/* 예약 시간 */}
         <TimeSection
@@ -198,6 +225,7 @@ export function ReservationForm({
           onClearTableSelection={clearTableSelection}
           onSelectHallTables={selectHallTables}
           onClearHallTables={clearHallTables}
+          buttonType='button'
         />
 
         {/* 음료 */}

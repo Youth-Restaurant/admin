@@ -25,6 +25,7 @@ interface TableSectionProps {
   onClearTableSelection: () => void;
   onSelectHallTables: (hallTables: number[]) => void;
   onClearHallTables: (hallTables: number[]) => void;
+  buttonType: 'button' | 'submit';
 }
 
 export function TableSection({
@@ -34,6 +35,7 @@ export function TableSection({
   onClearTableSelection,
   onSelectHallTables,
   onClearHallTables,
+  buttonType,
 }: TableSectionProps) {
   const [tables, setTables] = useState<GroupedTables>({
     홀1: [],
@@ -74,7 +76,7 @@ export function TableSection({
           <Button
             variant='outline'
             size='sm'
-            type='button'
+            type={buttonType}
             onClick={onSelectAllTables}
           >
             모두 선택
@@ -82,7 +84,7 @@ export function TableSection({
           <Button
             variant='outline'
             size='sm'
-            type='button'
+            type={buttonType}
             onClick={onClearTableSelection}
           >
             선택 취소
@@ -101,7 +103,7 @@ export function TableSection({
               <Button
                 variant='outline'
                 size='sm'
-                type='button'
+                type={buttonType}
                 onClick={() =>
                   onSelectHallTables(tables['홀1'].map((t) => t.tableNumber))
                 }
@@ -111,7 +113,7 @@ export function TableSection({
               <Button
                 variant='outline'
                 size='sm'
-                type='button'
+                type={buttonType}
                 onClick={() =>
                   onClearHallTables(tables['홀1'].map((t) => t.tableNumber))
                 }
@@ -156,7 +158,7 @@ export function TableSection({
               <Button
                 variant='outline'
                 size='sm'
-                type='button'
+                type={buttonType}
                 onClick={() =>
                   onSelectHallTables(tables['홀2'].map((t) => t.tableNumber))
                 }
@@ -166,7 +168,7 @@ export function TableSection({
               <Button
                 variant='outline'
                 size='sm'
-                type='button'
+                type={buttonType}
                 onClick={() =>
                   onClearHallTables(tables['홀2'].map((t) => t.tableNumber))
                 }

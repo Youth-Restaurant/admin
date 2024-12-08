@@ -17,8 +17,13 @@ import { ReservationForm } from './components/ReservationForm';
 import { ShoppingForm } from './components/ShoppingForm';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { LargeReservationForm } from './components/LargeReservationForm';
-import { format } from 'date-fns';
 import { RestaurantTable } from '@prisma/client';
+import { useReservations } from '@/hooks/useReservations';
+import { formatTime, getFormattedDateTime } from '@/lib/utils/date';
+import { TableItem } from './components/TableItem';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 type ModalType = 'reservation' | 'shopping' | 'reservationDetail' | null;
 
@@ -44,21 +49,12 @@ export default function Page() {
   const [date, setDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
-  const [viewMode, setViewMode] = useState<'default' | 'large'>(() => {
-    if (typeof window === 'undefined') return 'default';
-    return (
-      (localStorage.getItem(VIEW_MODE_STORAGE_KEY) as 'default' | 'large') ||
-      'default'
-    );
-  });
+  const [viewMode, setViewMode] = useState<'default' | 'large'>('default');
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [reservations, setReservations] = useState<ReservationWithCreatedBy[]>(
-    []
-  );
   const [selectedReservation, setSelectedReservation] =
     useState<ReservationWithCreatedBy | null>(null);
   const [tables, setTables] = useState<RestaurantTable[]>([]);
-  const [isLoadingReservations, setIsLoadingReservations] = useState(false);
+  const [tableError, setTableError] = useState<string | null>(null);
 
   const daysInWeek = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -102,6 +98,15 @@ export default function Page() {
     setModalType(type);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem(VIEW_MODE_STORAGE_KEY) as
+      | 'default'
+      | 'large';
+    if (savedViewMode) {
+      setViewMode(savedViewMode);
+    }
+  }, []);
 
   const handleViewModeChange = (value: 'default' | 'large') => {
     setViewMode(value);
@@ -148,61 +153,37 @@ export default function Page() {
     return days;
   };
 
-  useEffect(() => {
-    const fetchReservations = async () => {
-      if (!selectedDate) return;
-
-      setIsLoadingReservations(true);
-      try {
-        const response = await fetch(
-          `/api/reservations?date=${format(selectedDate, 'yyyy-MM-dd')}`
-        );
-        if (!response.ok) throw new Error('Failed to fetch reservations');
-        const reservationsData = await response.json();
-
-        const fetchUserName = async (userId: string) => {
-          const userResponse = await fetch(`/api/user?id=${userId}`);
-          if (!userResponse.ok) throw new Error('Failed to fetch user');
-          const userData = await userResponse.json();
-          return userData.nickname;
-        };
-
-        const reservationsWithUserNames = await Promise.all(
-          reservationsData.map(
-            async (
-              reservation: Omit<ReservationWithCreatedBy, 'createdBy'>
-            ) => {
-              const userName = await fetchUserName(reservation.createdById);
-              return { ...reservation, createdBy: userName };
-            }
-          )
-        );
-
-        setReservations(reservationsWithUserNames);
-      } catch (error) {
-        console.error('Failed to fetch reservations:', error);
-      } finally {
-        setIsLoadingReservations(false);
-      }
-    };
-
-    fetchReservations();
-  }, [selectedDate]);
+  const {
+    reservations,
+    isLoading: isLoadingReservations,
+    error,
+  } = useReservations(selectedDate);
 
   const handleReservationClick = async (
     reservation: ReservationWithCreatedBy
   ) => {
+    setTableError(null);
     try {
       const response = await fetch('/api/tables');
-      if (!response.ok) throw new Error('Failed to fetch tables');
+      if (!response.ok) {
+        throw new Error('테이블 정보를 불러오는데 실패했습니다.');
+      }
       const data = await response.json();
-      console.log('tables', data);
       setTables(data);
       setSelectedReservation(reservation);
       setModalType('reservationDetail');
       setIsModalOpen(true);
     } catch (error) {
-      console.error('Failed to fetch tables:', error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : '알 수 없는 오류가 발생했습니다.';
+      setTableError(errorMessage);
+      toast({
+        title: '오류 발생',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -225,59 +206,16 @@ export default function Page() {
     );
   };
 
-  const renderReservationsList = () => {
-    if (isLoadingReservations) {
-      return (
-        <div className='flex items-center justify-center py-8'>
-          <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
-        </div>
-      );
-    }
-
-    if (reservations.length === 0) {
-      return (
-        <div className='text-center py-8 text-muted-foreground'>
-          예약이 없습니다.
-        </div>
-      );
-    }
-
-    return (
-      <div className='space-y-2'>
-        {reservations.map((reservation) => (
-          <div
-            key={reservation.id}
-            className='p-4 bg-muted rounded-lg flex items-center justify-between cursor-pointer hover:bg-muted/80 transition-colors'
-            onClick={() => handleReservationClick(reservation)}
-          >
-            <div>
-              <p className='font-medium text-lg'>{reservation.guest.name}</p>
-              <p className='text-sm text-muted-foreground'>
-                등록자: {reservation.createdBy}
-              </p>
-              <p className='text-base text-muted-foreground'>
-                {(() => {
-                  const time = new Date(reservation.reservationDate);
-                  const hours = time.getHours();
-                  const minutes = time.getMinutes();
-                  const ampm = hours >= 12 ? '오후' : '오전';
-                  const displayHours = hours % 12 || 12;
-                  return `${ampm} ${displayHours}:${minutes
-                    .toString()
-                    .padStart(2, '0')}`;
-                })()}{' '}
-                | {reservation.numberOfGuests}명 | 테이블{' '}
-                {reservation.tables.map((t) => t.table.tableNumber).join(', ')}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className='h-[calc(100vh-4rem)] pt-3'>
+      {(error || tableError) && (
+        <Alert variant='destructive' className='mb-4'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertTitle>오류</AlertTitle>
+          <AlertDescription>{error || tableError}</AlertDescription>
+        </Alert>
+      )}
+
       <Card className='max-w-3xl mx-auto'>
         <CardHeader className='space-y-2'>
           <div className='flex items-center justify-between'>
@@ -308,14 +246,7 @@ export default function Page() {
           {selectedDate && (
             <div className='mt-6 space-y-4 border-t pt-4'>
               <p className='text-lg font-medium text-center'>
-                {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월{' '}
-                {selectedDate.getDate()}일 (
-                {
-                  ['일', '월', '화', '수', '목', '금', '토'][
-                    selectedDate.getDay()
-                  ]
-                }
-                )
+                {getFormattedDateTime(selectedDate)}
               </p>
 
               <div className='grid grid-cols-2 gap-2'>
@@ -337,7 +268,47 @@ export default function Page() {
 
               <div className='space-y-2 mb-4'>
                 <h3 className='font-medium text-xl'>예약 목록</h3>
-                {renderReservationsList()}
+                {isLoadingReservations ? (
+                  <div className='flex items-center justify-center py-8'>
+                    <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
+                  </div>
+                ) : error ? (
+                  <Alert variant='destructive'>
+                    <AlertCircle className='h-4 w-4' />
+                    <AlertTitle>예약 조� 실패</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                ) : reservations.length === 0 ? (
+                  <div className='text-center py-8 text-muted-foreground'>
+                    예약이 없습니다.
+                  </div>
+                ) : (
+                  <div className='space-y-2'>
+                    {reservations.map((reservation) => (
+                      <div
+                        key={reservation.id}
+                        className='p-4 bg-muted rounded-lg flex items-center justify-between cursor-pointer hover:bg-muted/80 transition-colors'
+                        onClick={() => handleReservationClick(reservation)}
+                      >
+                        <div>
+                          <p className='font-medium text-lg'>
+                            {reservation.guest.name}
+                          </p>
+                          <p className='text-sm text-muted-foreground'>
+                            등록자: {reservation.createdBy}
+                          </p>
+                          <p className='text-base text-muted-foreground'>
+                            {formatTime(new Date(reservation.reservationDate))}{' '}
+                            | {reservation.numberOfGuests}명 | 테이블{' '}
+                            {reservation.tables
+                              .map((t) => t.table.tableNumber)
+                              .join(', ')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -384,11 +355,14 @@ export default function Page() {
           <div>
             {modalType === 'reservation' ? (
               viewMode === 'large' ? (
-                <LargeReservationForm />
+                <LargeReservationForm
+                  selectedDate={selectedDate}
+                  onClose={() => setIsModalOpen(false)}
+                />
               ) : (
                 <ReservationForm
-                  onClose={() => setIsModalOpen(false)}
                   selectedDate={selectedDate}
+                  onClose={() => setIsModalOpen(false)}
                 />
               )
             ) : modalType === 'shopping' ? (
@@ -421,18 +395,9 @@ export default function Page() {
                             예약 시간
                           </td>
                           <td className='px-4 py-2'>
-                            {(() => {
-                              const time = new Date(
-                                selectedReservation.reservationDate
-                              );
-                              const hours = time.getHours();
-                              const minutes = time.getMinutes();
-                              const ampm = hours >= 12 ? '오후' : '오전';
-                              const displayHours = hours % 12 || 12;
-                              return `${ampm} ${displayHours}:${minutes
-                                .toString()
-                                .padStart(2, '0')}`;
-                            })()}
+                            {formatTime(
+                              new Date(selectedReservation.reservationDate)
+                            )}
                           </td>
                         </tr>
                         <tr>
@@ -467,23 +432,13 @@ export default function Page() {
                                       t.table.tableNumber === table.tableNumber
                                   );
                                 return (
-                                  <div
+                                  <TableItem
                                     key={table.id}
-                                    className={cn(
-                                      'aspect-square flex flex-col items-center justify-center rounded-md border text-sm',
-                                      isSelected &&
-                                        'bg-green-100 text-green-800 border-green-200',
-                                      !isSelected &&
-                                        'text-muted-foreground border-muted'
-                                    )}
-                                  >
-                                    <span className='font-medium'>
-                                      {table.tableNumber}번
-                                    </span>
-                                    <span className='text-xs'>
-                                      {table.capacity}인석
-                                    </span>
-                                  </div>
+                                    tableNumber={table.tableNumber}
+                                    capacity={table.capacity}
+                                    isSelected={isSelected}
+                                    className='w-full'
+                                  />
                                 );
                               })}
                           </div>

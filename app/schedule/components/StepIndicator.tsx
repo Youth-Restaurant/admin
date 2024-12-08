@@ -5,6 +5,7 @@ export default function StepIndicator({
   totalSteps,
   onBack,
   onNext,
+  onSubmit,
   isFirstStep,
   isLastStep,
   isNextDisabled,
@@ -13,6 +14,7 @@ export default function StepIndicator({
   totalSteps: number;
   onBack: () => void;
   onNext: () => void;
+  onSubmit?: () => void;
   isFirstStep: boolean;
   isLastStep: boolean;
   isNextDisabled: boolean;
@@ -43,7 +45,7 @@ export default function StepIndicator({
 
         {isLastStep ? (
           <Button
-            type='submit'
+            onClick={onSubmit}
             className='text-3xl px-8 py-6 bg-green-600 hover:bg-green-700'
           >
             예약 완료

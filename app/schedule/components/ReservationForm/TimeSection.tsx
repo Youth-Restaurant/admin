@@ -1,3 +1,5 @@
+// app/schedule/components/ReservationForm/TimeSection.tsx
+
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
   Select,

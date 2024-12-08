@@ -125,57 +125,56 @@ export async function POST(req: Request) {
   예약 날짜는 UTC 기준으로 변환된다.
 */
 
-export async function GET(req: Request) {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const date = searchParams.get('date');
+
+  if (!date) {
+    return new NextResponse('Date is required', { status: 400 });
+  }
+
   try {
-    // URL에서 쿼리 파라미터 추출
-    const { searchParams } = new URL(req.url);
-    const date = searchParams.get('date');
-
-    if (!date) {
-      return new NextResponse('Date is required', { status: 400 });
-    }
-
-    // 선택된 날짜의 시작과 끝 설정 (UTC 기준으로 변환)
-    const startDate = new Date(date);
-    // UTC 기준으로 변환
-    startDate.setUTCHours(0, 0, 0, 0);
-    // 선택된 날짜의 끝 설정 (UTC 기준으로 변환)
-    const endDate = new Date(date);
-    // UTC 기준으로 변환
-    endDate.setUTCHours(23, 59, 59, 999);
-
-    // 예약 정보 조회
     const reservations = await prisma.reservation.findMany({
       where: {
         reservationDate: {
-          gte: startDate,
-          lte: endDate,
+          gte: new Date(`${date}T00:00:00Z`),
+          lt: new Date(`${date}T23:59:59Z`),
         },
-        isCanceled: false,
       },
-      // 예약 정보 조회 시, 고객 정보, 예약 테이블 정보를 함께 조회
       include: {
-        guest: true,
+        guest: {
+          select: {
+            name: true,
+          },
+        },
         tables: {
-          include: {
-            // table은 테이블 정보를 포함
-            table: true,
+          select: {
+            table: {
+              select: {
+                tableNumber: true,
+              },
+            },
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            nickname: true,
           },
         },
       },
-      // 예약 날짜 순으로 정렬
-      orderBy: {
-        reservationDate: 'asc',
-      },
     });
 
-    return NextResponse.json(reservations);
+    const formattedReservations = reservations.map((reservation) => ({
+      ...reservation,
+      createdBy: reservation.createdBy.nickname,
+      createdById: reservation.createdBy.id,
+    }));
+
+    return NextResponse.json(formattedReservations);
   } catch (error) {
     console.error('Failed to fetch reservations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch reservations' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal error', { status: 500 });
   }
 }
 
