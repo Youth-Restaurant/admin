@@ -59,13 +59,25 @@ export async function POST(req: Request) {
       },
     });
 
+    // 유저 정보 조회
+    // 카카오 ID를 통해 유저 정보를 조회한다.
+    const user = await prisma.user.findUnique({
+      where: { kakaoId: userId },
+      select: { id: true },
+    });
+
+    // 유저 정보가 없는 경우, 404 에러 반환
+    if (!user) {
+      return new NextResponse('User not found', { status: 404 });
+    }
+
     // 예약 생성
     const reservation = await prisma.reservation.create({
       data: {
         // 예약한 고객의 ID
         guestId: guest.id,
         // createdById는 예약을 생성한 유저의 ID
-        createdById: userId,
+        createdById: user.id,
         // 예약 날짜
         reservationDate: new Date(reservationTime),
         // 예약 인원
