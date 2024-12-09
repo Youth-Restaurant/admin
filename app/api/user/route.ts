@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { kakaoId: id },
       select: { role: true, nickname: true },
     });
 

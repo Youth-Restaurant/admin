@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
     const userId = req.nextUrl.searchParams.get('id') as string;
 
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { kakaoId: userId },
       select: {
         nickname: true,
       },
