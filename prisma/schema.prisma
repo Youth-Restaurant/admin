@@ -1,23 +1,13 @@
-// prisma/schema.prisma
-
-// 클라이언트 설정
-// 아래 코드는 Prisma client를 설정한다.
-// prisma-client-js는 Prisma client의 기본 제공자이다.
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// 데이터베이스 설정
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-// 예약 인벤토리 모델
-// 예약 인벤토리는 예약 생성 시, 예약 인벤토리 생성 API를 통해 생성된다.
-// 예약 인벤토리가 필요한 이유는 예약 시 사용된 인벤토리를 관리하기 위함이다.
-// 예약 인벤토리 생성 API의 위치는 app/api/reservations/route.ts 파일에 있다.
 model ReservationInventory {
   id            Int         @id @default(autoincrement())
   reservationId Int
@@ -25,110 +15,71 @@ model ReservationInventory {
   reservation   Reservation @relation(fields: [reservationId], references: [id])
   inventory     Inventory   @relation(fields: [inventoryId], references: [id])
 
-  // 아래 코드는 예약 인벤토리 모델의 유니크 키를 설정한다.
   @@unique([reservationId, inventoryId])
-  // 아래 코드는 테이블 이름을 reservation_inventories로 설정한다.
   @@map("reservation_inventories")
 }
 
-// 유저 모델
 model User {
-  id                     String                   @id @unique
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kakaoId                String                   @unique // 카카오 ID 저장
+  email                  String?                  @unique
   role                   Role                     @default(STUDENT)
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
-  // 카카오에서 제공하는 닉네임
   nickname               String                   @default("이름")
-  // 유저가 등록한 인벤토리 목록
-  inventory              Inventory[]
-  // 유저가 수정한 인벤토리 이력 목록
+  inventory              Inventory[]              @relation("CreatedInventories")
+  inventoryUpdates       Inventory[]              @relation("UpdatedInventories")
   inventoryUpdateHistory InventoryUpdateHistory[]
-  // 유저가 등록한 공지사항 목록
   notices                Notice[]
-  // 유저가 등록한 예약 목록
   reservations           Reservation[]
 
-  // 아래 코드는 테이블 이름을 users로 설정한다.
   @@map("user")
 }
 
-// 공지사항 모델
+// 나머지 모델들도 User의 id를 참조하는 필드들의 타입을 UUID로 변경
 model Notice {
   id        Int      @id @default(autoincrement())
-  // 공지사항 작성자
   author    String
-  // 공지사항 작성자 권한
   role      Role
-  // 공지사항 내용
   content   String   @db.Text
-  // 공지사항 생성 시간
   createdAt DateTime @default(now())
-  // 공지사항 작성자 카카오 프로필 이미지 URL
   avatarUrl String
-  // 공지사항 작성자 ID
-  userId    String?
+  userId    String?  @db.Uuid
   User      User?    @relation(fields: [userId], references: [id])
 
   @@index([createdAt])
-  // 공지사항 작성자 ID에 대한 인덱스
-  @@index([userId], map: "notice_userId_fkey")
-  // 테이블 이름 설정
+  @@index([userId])
   @@map("notice")
 }
 
-// 인벤토리 모델
 model Inventory {
   id              Int                      @id @default(autoincrement())
   name            String
-  // 인벤토리 유형
   type            InventoryType            @default(SUPPLY)
-  // 인벤토리 수량
   quantity        Int?                     @default(-1)
-  // 인벤토리 상태
   status          InventoryStatus          @default(SUFFICIENT)
-  // 인벤토리 카테고리
   category        String
-  // 인벤토리 이미지 URL
   imageUrl        String?
-  // 인벤토리 최근 수정 시간
   lastUpdated     DateTime                 @default(now())
-  // 인벤토리 생성자 ID
-  createdBy       String
-  // 인벤토리 수정자 ID
-  updatedBy       String
-  // 인벤토리 메모
+  createdBy       String                   @db.Uuid
+  updatedBy       String                   @db.Uuid
   memo            String?                  @db.Text
-  // 인벤토리 최소 수량
   minimumQuantity Int?
-  // 인벤토리 제조사
   manufacturer    String?
-  // 인벤토리 모델 번호
   modelNumber     String?
-  // 인벤토리 유통 기한
   expirationDate  DateTime?
-  // 인벤토리 생성 시간
   createdAt       DateTime                 @default(now())
-  // 인벤토리 최근 수정 시간
   updatedAt       DateTime                 @updatedAt
-  // 인벤토리 위치 ID
   locationId      Int?
-  // 인벤토리 상위 위치
   parentLocation  String
-  // 인벤토리 하위 위치
   subLocation     String?
-  // 인벤토리 생성자
-  user            User                     @relation(fields: [createdBy], references: [id])
-  // 인벤토리 위치 참조
+  creator         User                     @relation("CreatedInventories", fields: [createdBy], references: [id])
+  updater         User                     @relation("UpdatedInventories", fields: [updatedBy], references: [id])
   locationRef     InventoryLocation?       @relation(fields: [locationId], references: [id])
-  // 인벤토리 수정 이력
   updateHistory   InventoryUpdateHistory[]
-  // 인벤토리 메인 카테고리
   mainCategory    String?
-  // 인벤토리 서브 카테고리
   subCategory     String?
-  // 인벤토리 예약 목록
   reservations    ReservationInventory[]
-  // 인벤토리 예약 목록
   Reservation     Reservation[]
 
   @@index([type])
@@ -138,17 +89,16 @@ model Inventory {
   @@index([createdBy])
   @@index([updatedBy])
   @@index([status])
-  @@index([locationId], map: "inventory_locationId_fkey")
+  @@index([locationId])
   @@index([mainCategory])
   @@index([subCategory])
   @@map("inventory")
 }
 
-// 인벤토리 수정 이력 모델
 model InventoryUpdateHistory {
   id          Int       @id @default(autoincrement())
   inventoryId Int
-  updatedBy   String
+  updatedBy   String    @db.Uuid
   changes     Json
   updatedAt   DateTime  @default(now())
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
@@ -159,7 +109,6 @@ model InventoryUpdateHistory {
   @@map("inventory_update_history")
 }
 
-// 열거형 참조 모델
 model EnumReference {
   id             Int            @id @default(autoincrement())
   supplyCategory SupplyCategory
@@ -171,7 +120,6 @@ model EnumReference {
   @@map("enum_reference")
 }
 
-// 인벤토리 위치 모델
 model InventoryLocation {
   id           Int                 @id @default(autoincrement())
   name         String
@@ -184,58 +132,29 @@ model InventoryLocation {
   subLocations InventoryLocation[] @relation("SubLocations")
 
   @@unique([name, type, parentId])
-  @@index([parentId], map: "inventory_location_parentId_fkey")
+  @@index([parentId])
   @@map("inventory_location")
 }
 
-// Enum을 사용하는 이유는 데이터의 일관성과 유효성을 보장하기 위함이다.
-// 사용법은 아래와 같다.
-// enum 열거형이름 {
-//   열거형값1 @map("데이터베이스에 저장될 값")
-//   열거형값2 @map("데이터베이스에 저장될 값")
-// }
-
-// Prisma studio에서는 열거형 값이 보인다.
-// 실제 데이터베이스에는 열거형 값이 저장되지 않는다.
-// 데이터베이스에는 열거형 값에 매핑된 값이 저장된다.
-
-// 인벤토리 유형 열거형
 enum InventoryType {
-  // 데이터베이스에는 물품이라는 값이 저장된다.
-  // Prisma studio에서는 SUPPLY라고 보인다.
   SUPPLY @map("물품")
-  // 데이터베이스에는 식재료라는 값이 저장된다.
-  // Prisma studio에서는 FOOD라고 보인다.
   FOOD   @map("식재료")
 }
 
-// 인벤토리 상태 열거형
 enum InventoryStatus {
-  // 데이터베이스에는 충분이라는 값이 저장된다.
-  // Prisma studio에서는 SUFFICIENT라고 보인다.
   SUFFICIENT @map("충분")
-  // 데이터베이스에는 부족이라는 값이 저장된다.
-  // Prisma studio에서는 LOW라고 보인다.
   LOW        @map("부족")
 }
 
-// 물품 카테고리 열거형
 enum SupplyCategory {
-  // 데이터베이스에는 청소용품이라는 값이 저장된다.
-  // Prisma studio에서는 CLEANING이라고 보인다.
   CLEANING   @map("청소용품")
-  // 데이터베이스에는 일회용품이라는 값이 저장된다.
-  // Prisma studio에서는 DISPOSABLE이라고 보인다.
   DISPOSABLE @map("일회용품")
   FURNITURE  @map("가구")
   KITCHEN    @map("주방용품")
   OFFICE     @map("사무용품")
 }
 
-// 식재료 카테고리 열거형
 enum FoodCategory {
-  // 데이터베이스에는 채소라는 값이 저장된다.
-  // Prisma studio에서는 VEGETABLE이라고 보인다.
   VEGETABLE @map("채소")
   MEAT      @map("육류")
   SEAFOOD   @map("수산물")
@@ -245,67 +164,33 @@ enum FoodCategory {
   BEVERAGE  @map("음료")
 }
 
-// 물품 위치 열거형
 enum SupplyLocation {
-  // 데이터베이스에는 주방이라는 값이 저장된다.
-  // Prisma studio에서는 KITCHEN이라고 보인다.
   KITCHEN @map("주방")
-  // 데이터베이스에는 홀이라는 값이 저장된다.
-  // Prisma studio에서는 HALL이라고 보인다.
   HALL    @map("홀")
-  // 데이터베이스에는 창고라는 값이 저장된다.
-  // Prisma studio에서는 STORAGE라고 보인다.
   STORAGE @map("창고")
 }
 
-// 식재료 위치 열거형
 enum FoodLocation {
-  // 데이터베이스에는 주방이라는 값이 저장된다.
-  // Prisma studio에서는 KITCHEN이라고 보인다.
   KITCHEN      @map("주방")
-  // 데이터베이스에는 창고라는 값이 저장된다.
-  // Prisma studio에서는 STORAGE라고 보인다.
   STORAGE      @map("창고")
-  // 데이터베이스에는 냉장고라는 값이 저장된다.
-  // Prisma studio에서는 REFRIGERATOR라고 보인다.
   REFRIGERATOR @map("냉장고")
 }
 
-// 유저 권한 열거형
 enum Role {
-  // 데이터베이스에는 이사라는 값이 저장된다.
-  // Prisma studio에서는 DIRECTOR라고 보인다.
   DIRECTOR    @map("이사")
-  // 데이터베이스에는 대표라는 값이 저장된다.
-  // Prisma studio에서는 CEO라고 보인다.
   CEO         @map("대표")
-  // 데이터베이스에는 국장이라는 값이 저장된다.
-  // Prisma studio에서는 DEPARTMENT라고 보인다.
   DEPARTMENT  @map("국장")
-  // 데이터베이스에는 팀장이라는 값이 저장된다.
-  // Prisma studio에서는 TEAM_LEADER라고 보인다.
   TEAM_LEADER @map("팀장")
-  // 데이터베이스에는 선생이라는 값이 저장된다.
-  // Prisma studio에서는 TEACHER라고 보인다.
   TEACHER     @map("선생")
-  // 데이터베이스에는 학생이라는 값이 저장된다.
-  // Prisma studio에서는 STUDENT라고 보인다.
   STUDENT     @map("학생")
-  // 데이터베이스에는 직급이라는 값이 저장된다.
-  // Prisma studio에서는 UNKNOWN이라고 보인다.
   UNKNOWN     @map("직급")
 }
 
-// 식당 테이블 모델
 model RestaurantTable {
   id           Int                @id @default(autoincrement())
-  // 테이블 번호
   tableNumber  Int                @unique
-  // 수용 인원
   capacity     Int
-  // 위치
   location     String
-  // 예약 목록
   reservations ReservationTable[]
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
@@ -313,71 +198,47 @@ model RestaurantTable {
   @@map("restaurant_tables")
 }
 
-// 고객 모델
 model Guest {
   id              Int           @id @default(autoincrement())
-  // 고객 이름
   name            String        @unique
-  // 최근 예약 날짜
   lastBookingDate DateTime
   gender          String?
-  // 예약 목록
   reservations    Reservation[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  // 이렇게 설정하면, 테이블 이름이 guests로 생성된다.
   @@map("guests")
 }
 
-// 예약 모델
 model Reservation {
   id                   Int                    @id @default(autoincrement())
-  // 고객 ID
   guestId              Int
-  // 생성자 ID
-  createdById          String
-  // 예약 날짜
+  createdById          String                 @db.Uuid
   reservationDate      DateTime
-  // 예약 인원
   numberOfGuests       Int
-  // 예약 취소 여부
   isCanceled           Boolean                @default(false)
-  // 예약 메모
   additionalNotes      String?                @db.Text
   guest                Guest                  @relation(fields: [guestId], references: [id])
   createdBy            User                   @relation(fields: [createdById], references: [id])
   tables               ReservationTable[]
-  // 예약 인벤토리는 예약 생성 시, 예약 인벤토리 생성 API를 통해 생성된다.
-  // 예약 인벤토리가 필요한 이유는 예약 시 사용된 인벤토리를 관리하기 위함이다.
   ReservationInventory ReservationInventory[]
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
-  // 인벤토리가 필요한 이유는 예약 시 사용된 인벤토리를 관리하기 위함이다.
   Inventory            Inventory?             @relation(fields: [inventoryId], references: [id])
   inventoryId          Int?
 
-  // 아래 코드는 예약 모델의 인덱스를 설정한다.
-  // 이렇게 설정하면, 예약 모델의 createdById 필드에 대한 인덱스가 생성된다.
-  // 인덱스는 쿼리 성능을 향상시키는 데 도움이 된다.
   @@index([createdById])
-  // 이렇게 설정하면, 테이블 이름이 reservations로 생성된다.
   @@map("reservations")
 }
 
-// 예약 테이블 모델
-// 예약 테이블이 필요한 이유는 예약 시 사용된 테이블을 관리하기 위함이다.
 model ReservationTable {
   id            Int             @id @default(autoincrement())
   reservationId Int
   tableId       Int
-  // 예약 시 사용된 좌석 수
   seatsUsed     Int
   reservation   Reservation     @relation(fields: [reservationId], references: [id])
   table         RestaurantTable @relation(fields: [tableId], references: [id])
 
-  // 아래 코드는 예약 테이블 모델의 유니크 키를 설정한다.
   @@unique([reservationId, tableId])
-  // 이렇게 설정하면, 테이블 이름이 reservation_tables로 생성된다.
   @@map("reservation_tables")
 }

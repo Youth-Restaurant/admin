@@ -1,6 +1,6 @@
 // app/page.tsx
 import { Suspense } from 'react';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import NoticePreview from '@/components/Notice/NoticePreview';
 import Loading from './loading';
 import CreateNotice from '@/components/Notice/CreateNotice';

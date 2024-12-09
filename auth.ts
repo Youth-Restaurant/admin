@@ -25,12 +25,7 @@ declare module 'next-auth' {
       nickname: string;
       role: $Enums.Role;
       image: string | null;
-      /**
-       * By default, TypeScript merges new interface properties and overwrites existing ones.
-       * In this case, the default session user properties will be overwritten,
-       * with the new ones defined above. To keep the default session user properties,
-       * you need to add them back into the newly declared interface.
-       */
+      kakaoId: string;
     } & DefaultSession['user'];
   }
 
@@ -81,13 +76,13 @@ export const { handlers, signIn, auth } = NextAuth({
 
         try {
           await prisma.user.upsert({
-            where: { id },
+            where: { kakaoId: id },
             update: {
               nickname,
               // image: profile_image || null,
             },
             create: {
-              id,
+              kakaoId: id,
               nickname,
               // image: profile_image || null,
               // email: profile.kakao_account?.email,
