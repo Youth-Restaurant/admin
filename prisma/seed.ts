@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.POSTGRES_URL_NON_POOLING, // Supabase direct connection for batch operations
+      url: process.env.DIRECT_URL, // Supabase direct connection for batch operations
     },
   },
 });
