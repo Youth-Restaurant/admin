@@ -194,6 +194,10 @@ model RestaurantTable {
   reservations ReservationTable[]
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
+  // 테이블 위치
+  positionX    Float              @default(0) // x 좌표
+  positionY    Float              @default(0) // y 좌표
+  isVertical   Boolean            @default(false) // 수직/수평 배치
 
   @@map("restaurant_tables")
 }
