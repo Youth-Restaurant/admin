@@ -44,7 +44,7 @@ export default async function RootLayout({
   return (
     <html lang='en'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100 overflow-hidden`}
       >
         <div className='min-w-[340px] max-w-[500px] m-auto bg-white min-h-screen relative'>
           {session?.user.nickname ? (

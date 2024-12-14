@@ -11,7 +11,10 @@ const prisma = new PrismaClient({
 async function main() {
   // 기존 데이터 삭제 (필요한 경우)
   try {
-    await prisma.restaurantTable.deleteMany({});
+    await prisma.reservationTable.deleteMany(); //reservation_tables 테이블 먼저 삭제
+    await prisma.restaurantTable.deleteMany(); // 그다음 restaurantTable 테이블 삭제
+    await prisma.reservation.deleteMany(); // 마지막으로 reservation 테이블 삭제
+
     console.log('기존 테이블 데이터 삭제 완료');
   } catch (error) {
     console.error('기존 데이터 삭제 중 오류:', error);
@@ -19,24 +22,122 @@ async function main() {
 
   // HALL 1 테이블 데이터
   const hall1Tables = [
-    { tableNumber: 1, capacity: 4, location: '홀1' },
-    { tableNumber: 2, capacity: 4, location: '홀1' },
-    { tableNumber: 3, capacity: 4, location: '홀1' },
-    { tableNumber: 4, capacity: 4, location: '홀1' },
-    { tableNumber: 5, capacity: 6, location: '홀1' },
-    { tableNumber: 6, capacity: 6, location: '홀1' },
+    {
+      tableNumber: 1,
+      capacity: 4,
+      location: '홀1',
+      positionX: 100,
+      positionY: 100,
+      isVertical: false,
+    },
+    {
+      tableNumber: 2,
+      capacity: 4,
+      location: '홀1',
+      positionX: 200,
+      positionY: 100,
+      isVertical: false,
+    },
+    {
+      tableNumber: 3,
+      capacity: 4,
+      location: '홀1',
+      positionX: 300,
+      positionY: 100,
+      isVertical: false,
+    },
+    {
+      tableNumber: 4,
+      capacity: 4,
+      location: '홀1',
+      positionX: 100,
+      positionY: 200,
+      isVertical: false,
+    },
+    {
+      tableNumber: 5,
+      capacity: 6,
+      location: '홀1',
+      positionX: 200,
+      positionY: 200,
+      isVertical: true,
+    },
+    {
+      tableNumber: 6,
+      capacity: 6,
+      location: '홀1',
+      positionX: 300,
+      positionY: 200,
+      isVertical: true,
+    },
   ];
 
   // HALL 2 테이블 데이터
   const hall2Tables = [
-    { tableNumber: 7, capacity: 6, location: '홀2' },
-    { tableNumber: 8, capacity: 6, location: '홀2' },
-    { tableNumber: 9, capacity: 6, location: '홀2' },
-    { tableNumber: 10, capacity: 4, location: '홀2' },
-    { tableNumber: 11, capacity: 4, location: '홀2' },
-    { tableNumber: 12, capacity: 4, location: '홀2' },
-    { tableNumber: 13, capacity: 6, location: '홀2' },
-    { tableNumber: 14, capacity: 6, location: '홀2' },
+    {
+      tableNumber: 7,
+      capacity: 6,
+      location: '홀2',
+      positionX: 100,
+      positionY: 100,
+      isVertical: true,
+    },
+    {
+      tableNumber: 8,
+      capacity: 6,
+      location: '홀2',
+      positionX: 200,
+      positionY: 100,
+      isVertical: true,
+    },
+    {
+      tableNumber: 9,
+      capacity: 6,
+      location: '홀2',
+      positionX: 300,
+      positionY: 100,
+      isVertical: true,
+    },
+    {
+      tableNumber: 10,
+      capacity: 4,
+      location: '홀2',
+      positionX: 100,
+      positionY: 200,
+      isVertical: false,
+    },
+    {
+      tableNumber: 11,
+      capacity: 4,
+      location: '홀2',
+      positionX: 200,
+      positionY: 200,
+      isVertical: false,
+    },
+    {
+      tableNumber: 12,
+      capacity: 4,
+      location: '홀2',
+      positionX: 300,
+      positionY: 200,
+      isVertical: false,
+    },
+    {
+      tableNumber: 13,
+      capacity: 6,
+      location: '홀2',
+      positionX: 100,
+      positionY: 300,
+      isVertical: true,
+    },
+    {
+      tableNumber: 14,
+      capacity: 6,
+      location: '홀2',
+      positionX: 200,
+      positionY: 300,
+      isVertical: true,
+    },
   ];
 
   try {
