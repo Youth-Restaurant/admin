@@ -68,7 +68,7 @@ const getFileExtension = (file: File): string => {
  *
  * @param {File} file - 압축할 이미지 파일
  * @param {Object} options - 압축 옵션
- * @param {number} options.maxSizeMB - 압축 후 최대 파일 크기 (MB)
+ * @param {number} options.maxSizeMB - ���축 후 최대 파일 크기 (MB)
  * @param {number} options.maxWidthOrHeight - 압축 후 최대 너비/높이 (픽셀)
  * @returns {Promise<File>} 압축된 이미지 파일
  */
@@ -103,21 +103,32 @@ const compressImage = async (
  * @throws {Error} 업로드 실패 시 에러
  */
 const uploadImage = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('extension', getFileExtension(file));
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-  const response = await fetch('/api/storage', {
-    method: 'POST',
-    body: formData,
+    reader.onloadend = async () => {
+      try {
+        const base64Data = reader.result?.toString().split(',')[1];
+        const response = await fetch('/api/storage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: file.name,
+            fileContent: base64Data,
+          }),
+        });
+
+        if (!response.ok) throw new Error('Upload failed');
+        const data = await response.json();
+        resolve(data.url);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = () => reject(new Error('File reading failed'));
   });
-
-  if (!response.ok) {
-    throw new Error('Upload failed');
-  }
-
-  const data = await response.json();
-  return data.url;
 };
 
 /**
@@ -211,20 +222,6 @@ export const useImageUpload = ({
         maxSizeMB,
         maxWidthOrHeight,
       });
-      console.log(
-        'Original file:',
-        file.name,
-        '(',
-        file.size / 1024 / 1024,
-        'MB)'
-      );
-      console.log(
-        'Compressed file:',
-        compressedFile.name,
-        '(',
-        compressedFile.size / 1024 / 1024,
-        'MB)'
-      );
 
       const imageUrl = await uploadImage(compressedFile);
       setPreviewUrl(imageUrl);

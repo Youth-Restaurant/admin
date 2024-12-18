@@ -1,21 +1,31 @@
+import { createClient } from '@supabase/supabase-js';
 // pages/api/storage.ts 또는 app/api/storage/route.ts
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
+    const file = formData.get('file') as File;
+    const fileName = formData.get('fileName') as string;
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_FILE_STORAGE_URL}/storage`,
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
+    // ☁️ **Supabase에 업로드**
+    const { data, error } = await supabase.storage
+      .from('inventory') // 스토리지 버킷 이름
+      .upload(`uploads/${fileName}`, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: 'image/jpeg',
+      });
 
-    if (!response.ok) {
+    console.log(data, error);
+
+    if (error) {
       throw new Error('Upload failed');
     }
-    const data = await response.json();
-
     return Response.json(data);
   } catch (error) {
     console.error('Upload failed:', error);
