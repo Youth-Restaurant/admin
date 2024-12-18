@@ -72,7 +72,7 @@ export default function ImageUploader({
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        await handleImageSelect(file);
+        await handleImageSelect(file, 'inventory');
       }
     },
     [handleImageSelect]
@@ -120,6 +120,7 @@ export default function ImageUploader({
                       className={`object-cover rounded-md ${
                         isLoading ? 'opacity-50' : ''
                       }`}
+                      sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
                     />
                     {isLoading && (
                       <div className='absolute inset-0 flex items-center justify-center bg-black/20 rounded-md'>

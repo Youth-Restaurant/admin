@@ -26,13 +26,14 @@ interface UseImageUploadOptions {
  * @interface UseImageUploadResult
  * @property {string | null} previewUrl - 이미지 미리보기 URL
  * @property {boolean} isLoading - 업로드 진행 상태
+ * @property {string} bucket - 업로드할 버킷 이름
  * @property {function} handleImageSelect - 이미지 선택 처리 함수
  * @property {function} handleImageRemove - 이미지 제거 처리 함수
  */
 interface UseImageUploadResult {
   previewUrl: string | null;
   isLoading: boolean;
-  handleImageSelect: (file: File) => Promise<void>;
+  handleImageSelect: (file: File, bucket: string) => Promise<void>;
   handleImageRemove: () => void;
 }
 
@@ -104,44 +105,39 @@ const compressImage = async (
  * @returns {Promise<string>} 업로드된 이미지의 URL
  * @throws {Error} 업로드 실패 시 에러
  */
-const uploadImage = async (file: File): Promise<string> => {
+const uploadImage = async (
+  file: File,
+  bucket: string = 'inventory'
+): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    reader.onloadend = async () => {
-      try {
-        if (!reader.result) {
-          return reject(new Error('File reading failed: No file result'));
-        }
-
-        const base64Data = reader.result.toString().split(',')[1];
-        const uniqueFileName = `${uuidv4()}-${file.name}`; // 🔥 파일 이름에 UUID 추가
-
-        const response = await fetch('/api/storage', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileName: uniqueFileName,
-            fileContent: base64Data,
-          }),
+    try {
+      const formData = new FormData(); // 📦 **FormData 사용**
+      const uniqueFileName = `${uuidv4()}-${file.name}`; // 🔥 **파일명에 UUID 추가**
+      formData.append('file', file); // 🔥 **File을 그대로 추가 (Blob 형태)**
+      formData.append('fileName', uniqueFileName); // **파일명도 함께 전송**
+      formData.append('bucket', bucket);
+      fetch(`/api/storage`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              `Upload failed: ${errorData.error || 'Unknown error'}`
+            );
+          }
+          const data = await response.json();
+          console.log('업로드 성공:', data);
+          resolve(uniqueFileName); // 🔥 **URL 반환**
+        })
+        .catch((error) => {
+          reject(error);
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            `Upload failed: ${errorData.error || 'Unknown error'}`
-          );
-        }
-
-        const data = await response.json();
-        resolve(data.url); // 🔥 URL 반환 명확히
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    reader.onerror = () => reject(new Error('File reading failed'));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      reject(new Error('File upload failed'));
+    }
   });
 };
 
@@ -226,7 +222,10 @@ export const useImageUpload = ({
    *
    * @param {File} file - 선택된 이미지 파일
    */
-  const handleImageSelect = async (file: File): Promise<void> => {
+  const handleImageSelect = async (
+    file: File,
+    bucket: string
+  ): Promise<void> => {
     if (!validateImage(file)) return;
 
     try {
@@ -237,9 +236,12 @@ export const useImageUpload = ({
         maxWidthOrHeight,
       });
 
-      const imageUrl = await uploadImage(compressedFile);
-      setPreviewUrl(imageUrl);
-      onUploadSuccess?.(imageUrl);
+      const path = await uploadImage(compressedFile, bucket);
+      const { url } = await fetch(`/api/storage?path=${path}`).then((res) =>
+        res.json()
+      );
+      setPreviewUrl(url);
+      onUploadSuccess?.(url);
 
       toast({
         title: 'Success',
