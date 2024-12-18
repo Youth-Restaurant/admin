@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { useState } from 'react';
 import imageCompression from 'browser-image-compression';
 import { useToast } from '@/hooks/use-toast';
@@ -109,19 +111,31 @@ const uploadImage = async (file: File): Promise<string> => {
 
     reader.onloadend = async () => {
       try {
-        const base64Data = reader.result?.toString().split(',')[1];
+        if (!reader.result) {
+          return reject(new Error('File reading failed: No file result'));
+        }
+
+        const base64Data = reader.result.toString().split(',')[1];
+        const uniqueFileName = `${uuidv4()}-${file.name}`; // 🔥 파일 이름에 UUID 추가
+
         const response = await fetch('/api/storage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            fileName: file.name,
+            fileName: uniqueFileName,
             fileContent: base64Data,
           }),
         });
 
-        if (!response.ok) throw new Error('Upload failed');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            `Upload failed: ${errorData.error || 'Unknown error'}`
+          );
+        }
+
         const data = await response.json();
-        resolve(data.url);
+        resolve(data.url); // 🔥 URL 반환 명확히
       } catch (error) {
         reject(error);
       }
